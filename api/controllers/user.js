@@ -1,13 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const mongoose = require('mongoose');
-
-const User = require('../models/user');
+const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const User = require('../models/user');
+
 // Create a new user
-router.post('/signup', (req, res, next) => {
+exports.user_create = (req, res, next) => {
 
     // Check if user with given email is already registered
     User.find({email: req.body.email}).exec()
@@ -41,10 +39,10 @@ router.post('/signup', (req, res, next) => {
             });
         }
     });
-});
+};
 
 // Login
-router.post('/login', (req, res, next) => {
+exports.user_login = (req, res, next) => {
     // Check if user exists
     User.find({email: req.body.email}).exec()
     .then((user) => {
@@ -79,15 +77,13 @@ router.post('/login', (req, res, next) => {
     .catch((error) => {
         res.status(500).json({message: error.message})
     });
-});
+};
 
 // Delete user with given id
-router.delete('/:userId', (req, res, next) => {
+exports.user_delete = (req, res, next) => {
     User.deleteOne({_id: req.params.userId}).exec()
     .then((result) => {
         res.status(200).json({message: 'user deleted'});
     })
     .catch((error) => res.status(500).json({message: error.message}))
-});
-
-module.exports = router;
+};

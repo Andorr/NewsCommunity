@@ -1,17 +1,9 @@
-const express = require('express');
-const router = express.Router();
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-
-// Project imports
 const News = require('../models/news');
-const constants = require('../helpers/constants');
-const filehandler = require('../helpers/filehandler');
-const upload = filehandler.upload;
-const checkAuth = require('../middleware/check-auth');
 
 // Fetch all news
-router.get('/', (req, res) => {
+exports.news_get_all = (req, res) => {
     News.find({}, (err, data) => {
         if(err) {
             res.status(500);
@@ -19,10 +11,10 @@ router.get('/', (req, res) => {
             res.json(data);
         }
     });
-});
+};
 
 // Create a new news-item
-router.post('/', upload.single('image'), (req, res) => {
+exports.news_create = (req, res) => {
     // Check if file was provided
     if(!req.file) {
         res.status(404).json({error: 'Image was not provided'});
@@ -38,19 +30,19 @@ router.post('/', upload.single('image'), (req, res) => {
     });
     news.save().then((result) => {
         console.log(result);
-        res.status(constants.created);
+        res.status(201);
         res.json(news);
     })
     .catch((error) => {
         res.status(500);
         res.json({message: error.message});
     });
-});
+};
 
 // Delete news, all users can delete news
-router.delete('/:id', checkAuth, (req, res) => {
+exports.news_delete = (req, res) => {
     // Delete item
-    News.delete({_id: req.params.id}).exec()
+    News.deleteOne({_id: req.params.id}).exec()
     .then((result) => {
         if(result) {
             res.status(200).json({message: 'deleted'});
@@ -61,6 +53,4 @@ router.delete('/:id', checkAuth, (req, res) => {
     .catch((error) => {
         res.status(500).json({message: error.message});
     });
-});
-
-module.exports = router;
+};

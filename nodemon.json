@@ -1,5 +1,6 @@
 {
     "env": {
+        "MONGODB_PASSWORD": "1234abcd",
         "JWT_KEY": "secret"
     }
 }
