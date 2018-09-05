@@ -35,4 +35,7 @@ app.use((req, res, next) => {
     });
 });
 
+// Env
+process.env.JWT_KEY = 'asdfasdf';
+
 const server = app.listen(8080);
