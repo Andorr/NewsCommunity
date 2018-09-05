@@ -11,5 +11,6 @@ const NewsController = require('../controllers/news');
 router.get('/', NewsController.news_get_all);
 router.post('/', upload.single('image'), NewsController.news_create);
 router.delete('/:id', checkAuth, NewsController.news_delete);
+router.put('/:id', upload.single('image'), NewsController.news_put);
 
 module.exports = router;

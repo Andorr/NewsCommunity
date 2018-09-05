@@ -54,3 +54,38 @@ exports.news_delete = (req, res) => {
         res.status(500).json({message: error.message});
     });
 };
+
+// Edit news, only passed in items should affect the news
+exports.news_put = (req, res) => {
+    
+    // Find News item
+    News.findOne({_id: req.params.id}, (err, news) => {
+        if(err) {
+            res.status(404).json({error: err.message});
+        } else {
+            // Find changes
+            if(req.body.title !== undefined) {
+                news.title = req.body.title;
+            }
+            if(req.body.content  !== undefined) {
+                news.content = req.body.content;
+            }
+            if(req.file) {
+                news.image = req.headers.host + "/images/" + req.file.filename;
+            }
+            if(req.body.category !== undefined) {
+                news.category = req.body.category;
+            }
+            if(req.body.importance !== undefined) {
+                news.importance = req.body.importance;
+            }
+            news.save((error, updatedNews) => {
+                if(error) {
+                    res.status(400).send(error);
+                } else {
+                    res.status(200).send(updatedNews);
+                }
+            });
+        }
+    });
+};
