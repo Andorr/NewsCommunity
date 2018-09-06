@@ -26,7 +26,8 @@ exports.user_create = (req, res, next) => {
                     // Create user with new hash and salt
                     const user = new User({
                         email: req.body.email,
-                        password: hash
+                        password: hash,
+                        nickname: req.body.nickname,
                     });
                     user.save().then((result) => {
                         res.status(201).json({
@@ -64,6 +65,7 @@ exports.user_login = (req, res, next) => {
                 const token = jwt.sign({
                     email: user[0].email,
                     userId: user[0]._id,
+                    nickname: user[0].nickname,
                 }, process.env.JWT_KEY, {
                     expiresIn: '1h',
                 });
@@ -81,6 +83,13 @@ exports.user_login = (req, res, next) => {
 
 // Delete user with given id
 exports.user_delete = (req, res, next) => {
+    // Check if authorized user is the user to be deleted
+    if(req.params.userId !== req.userData.userId) {
+        return res.status(401).json({
+            message: 'Authorization failed'
+        });
+    }
+
     User.deleteOne({_id: req.params.userId}).exec()
     .then((result) => {
         res.status(200).json({message: 'user deleted'});

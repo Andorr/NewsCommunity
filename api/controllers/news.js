@@ -1,15 +1,37 @@
 const mongoose = require("mongoose");
 
 const News = require('../models/news');
+const Vote = require('../models/vote');
+const Comment = require('../models/comment');
 
 // Fetch all news
 exports.news_get_all = (req, res) => {
-    News.find({}, (err, data) => {
-        if(err) {
-            res.status(500);
+    // Get all news, and unselect votes list
+    News.find({}).select('-votes').exec()
+    .then((news) => {
+        if(news) {
+            res.json(news);
         } else {
-            res.json(data);
+            res.status(500);
         }
+    })
+    .catch((error) => {
+        res.status(500).json({message: error.message});
+    });
+};
+
+// Fetch a news-item based on id
+exports.news_get = (req, res) => {
+    News.findOne({_id: req.params.id}).select('-votes').exec()
+    .then((news) => {
+        if(news) {
+            res.json(news);
+        } else {
+            res.status(500);
+        }
+    })
+    .catch((error) => {
+        res.status(500).json({message: error.message});
     });
 };
 
@@ -24,7 +46,6 @@ exports.news_create = (req, res) => {
     // Create new news
     const news = new News({
         id: new mongoose.Types.ObjectId(),
-        created_at: new Date(),
         image: req.headers.host + "/images/" + req.file.filename,
         ...req.body,
     });
@@ -89,3 +110,79 @@ exports.news_put = (req, res) => {
         }
     });
 };
+
+// Add comment to post
+exports.news_comment_create = (req, res) => {
+   
+    // Find news item
+    News.findById(req.body.news, (err, news) => {
+        if(err) {
+            res.status(500).json({message: err.message});
+        } else if(!news) {
+            res.status(404).json({message: 'Can not find the given news item'});
+        } else {
+            // Create new comment
+            const comment = new Comment({
+                comment: req.body.comment,
+                user: req.userData.userId,
+                user_nickname: req.userData.nickname,
+            });
+            comment.save().then((result) => {
+                if(result) {
+                    // Append new comment
+                    news.update({$push: {comments: comment}}, (error, success) => {
+                        if(err) {
+                            res.status(500).json({message: error.message});
+                        } else {
+                            res.status(200).json(comment);
+                        }
+                    });
+                } else {
+                    res.status(500);
+                }
+            })
+            .catch((error) => {
+                res.status(500).json({message: error.message});
+            });
+        }
+    });
+};
+
+// Vote on a news item
+exports.news_vote = (req, res) => {
+    // Find news item
+    News.findById(req.body.news, (err, news) => {
+        if(err) {
+            res.status(500).json({message: err.message});
+        } else if(!news) {
+            res.status(404).json({message: 'Can not find the given news item'});
+        } else {
+            // TODO: Check if user has voted already
+
+            // Create new vote
+            const vote = new Vote({
+                vote: req.body.vote,
+                user: req.userData.userId,
+            });
+            vote.save().then((result) => {
+                if(result) {
+                    // Append new vote
+                    news.update({$push: {votes: vote}, $inc: {vote_count: 1}}, (error, success) => {
+                        if(err) {
+                            res.status(500).json({message: error.message});
+                        } else {
+                            res.status(200).json(vote);
+                        }
+                    });
+                } else {
+                    res.status(500);
+                }
+            })
+            .catch((error) => {
+                res.status(500).json({message: error.message});
+            });
+        }
+    });
+};
+
+// TODO: Delete vote
