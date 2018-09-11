@@ -8,6 +8,6 @@ const userModel = new Schema({
         match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
     },
     password: {type: String, required: true, select: false},
-    nickname: {type: String, default: 'Unknown'},
+    nickname: {type: String},
 });
 module.exports = mongoose.model('user', userModel);

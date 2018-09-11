@@ -45,7 +45,7 @@ exports.user_create = (req, res, next) => {
 // Login
 exports.user_login = (req, res, next) => {
     // Check if user exists
-    User.find({email: req.body.email}).exec()
+    User.find({email: req.body.email}).select('+password').exec()
     .then((user) => {
         if(user.length < 1) {
             return res.status(401).json({

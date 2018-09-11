@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 const News = require('../models/news');
-const Vote = require('../models/vote');
-const Comment = require('../models/comment');
+const wss = require('../helpers/ws');
+// ----- NEWS -------
 
 // Fetch all news
 exports.news_get_all = (req, res) => {
@@ -50,7 +50,7 @@ exports.news_create = (req, res) => {
         ...req.body,
     });
     news.save().then((result) => {
-        console.log(result);
+        wss.send(result); // Send news-item through the webserver
         res.status(201);
         res.json(news);
     })
@@ -104,12 +104,15 @@ exports.news_put = (req, res) => {
                 if(error) {
                     res.status(400).send(error);
                 } else {
+                    wss.send(updatedNews); // Send news-item through the webserver
                     res.status(200).send(updatedNews);
                 }
             });
         }
     });
 };
+
+// ------- COMMENTS ------
 
 // Add comment to post
 exports.news_comment_create = (req, res) => {
@@ -122,33 +125,76 @@ exports.news_comment_create = (req, res) => {
             res.status(404).json({message: 'Can not find the given news item'});
         } else {
             // Create new comment
-            const comment = new Comment({
+            const comment = {
                 comment: req.body.comment,
                 user: req.userData.userId,
                 user_nickname: req.userData.nickname,
-            });
-            comment.save().then((result) => {
-                if(result) {
-                    // Append new comment
-                    news.update({$push: {comments: comment}}, (error, success) => {
-                        if(err) {
-                            res.status(500).json({message: error.message});
-                        } else {
-                            res.status(200).json(comment);
-                        }
-                    });
+            }
+            news.comments.push(comment);
+            news.save((error, success) => {
+                if(err) {
+                    res.status(500).json({message: error.message});
                 } else {
-                    res.status(500);
+                    wss.send(news); // Send news-item through the webserver
+                    res.status(200).json(comment);
                 }
-            })
-            .catch((error) => {
-                res.status(500).json({message: error.message});
             });
         }
     });
 };
 
-// Vote on a news item
+// Edit comment
+exports.news_comment_edit = (req, res) => {
+
+    News.findById(req.body.news, (err, news) => {
+        if(err) {
+            res.status(500).json({error: err.message});
+        } else {
+            const commentId = req.params.id;
+            const index = news.comments.findIndex((elem) => elem.id == commentId);
+            if(index != -1) {
+                news.comments[index].comment = req.body.comment;
+            }
+            news.save((error, success) => {
+                if(error) {
+                    res.status(500).json({message: error.message});
+                } else {
+                    wss.send(news);
+                    res.status(200).json(news.comments[index]);
+                }
+            });
+        }
+    });
+}
+
+// Delete comment
+exports.news_comment_delete = (req, res) => {
+
+    News.findById(req.body.news, (err, news) => {
+        if(err) {
+            res.status(500).json({error: err.message});
+        } else {
+            const commentId = req.params.id;
+            const index = news.comments.findIndex((elem) => elem.id == commentId);
+            if(index != -1) {
+                news.comments.splice(index,1);
+            }
+            news.save((error, success) => {
+                if(error) {
+                    res.status(500).json({message: error.message});
+                } else {
+                    wss.send(news);
+                    res.status(200).json({message: 'deleted'});
+                }
+            });
+        }
+    });
+}
+
+
+// ------- VOTES ----------
+
+// Vote on a news item - create 
 exports.news_vote = (req, res) => {
     // Find news item
     News.findById(req.body.news, (err, news) => {
@@ -157,32 +203,45 @@ exports.news_vote = (req, res) => {
         } else if(!news) {
             res.status(404).json({message: 'Can not find the given news item'});
         } else {
-            // TODO: Check if user has voted already
+            // Check if it already exists
+            const index = news.votes.findIndex((elem) => elem.user == req.userData.userId);
 
-            // Create new vote
-            const vote = new Vote({
-                vote: req.body.vote,
-                user: req.userData.userId,
-            });
-            vote.save().then((result) => {
-                if(result) {
-                    // Append new vote
-                    news.update({$push: {votes: vote}, $inc: {vote_count: 1}}, (error, success) => {
-                        if(err) {
+            // If vote is an upvote
+            if(req.body.upvote === true) {
+                if(index === -1) {
+                    const vote = {
+                        user: req.userData.userId,
+                    };
+                    news.votes.push(vote);
+                    news.vote_count += 1;
+                    news.save((error, success) => {
+                        if(error) {
                             res.status(500).json({message: error.message});
                         } else {
-                            res.status(200).json(vote);
+                            wss.send(news); // Send news-item through the webserver
+                            res.status(201).json(vote);
                         }
                     });
                 } else {
-                    res.status(500);
+                    res.status(404).send("");
                 }
-            })
-            .catch((error) => {
-                res.status(500).json({message: error.message});
-            });
+            } else {
+                // Delete item
+                if(index !== -1) {
+                    news.votes.splice(index,1);
+                    news.vote_count -= 1;
+                    news.save((error, success) => {
+                        if(error) {
+                            res.status(500).json({message: error.message});
+                        } else {
+                            wss.send(news); // Send news-item through the webserver
+                            res.status(200).json({message: 'deleted'});
+                        }
+                    });
+                } else {
+                    res.status(404).send("");
+                }
+            }
         }
     });
 };
-
-// TODO: Delete vote

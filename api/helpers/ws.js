@@ -1,37 +1,43 @@
 const WebSocket = require('ws');
-let wss = null;
 
-exports.init = (server) => {
-    wss = new WebSocket.Server({server});
-    console.log("Websocket started");
-    wss.on('open', () => {
-        console.log("Websocket started");
-    });
+class WS {
 
-    wss.on('connection', (ws) => {
-
-        console.log("Connected");
-        ws.on('message', (msg) => {
-            console.log('received: %s', msg);
-            
-            wss.clients.forEach((client) => {
-                if(client != ws) {
-                    client.send(msg);
-                }
-            });
-        });
-        ws.send('Welcome! :D');
-    });
-};
-
-exports.wss = wss;
-
-exports.onmessage = (callback) => {
-    if(wss === null) {
-        return;
+    constructor() {
+        this.wss = null;
     }
 
-    wss.on('message', (data) => {
-        callback(wss, data);
-    });
+    init(server) {
+        this.wss = new WebSocket.Server({server});
+        console.log("Websocket started");
+        this.wss.on('open', () => {
+            console.log("Websocket started");
+        });
+
+        this.wss.on('connection', (ws) => {
+
+            console.log("Connected");
+            ws.on('message', (msg) => {
+                this.wss.clients.forEach((client) => {
+                    if(client != ws) {
+                        client.send(msg);
+                    }
+                });
+            });
+            ws.send(JSON.stringify({message: 'Welcome! :D'}));
+        });
+    }
+
+    send(msg) {
+        if(this.wss === null) {
+            return;
+        }
+    
+        this.wss.clients.forEach((client) => {
+            client.send(JSON.stringify(msg));
+        });
+    }
 }
+
+const ws = new WS();
+
+module.exports = ws;
