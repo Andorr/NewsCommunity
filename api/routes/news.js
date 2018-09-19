@@ -4,21 +4,21 @@ const router = express.Router();
 // Middleware and helpers
 const filehandler = require('../helpers/filehandler');
 const upload = filehandler.upload;
-const checkAuth = require('../middleware/check-auth');
+const auth = require('../middleware/auth');
 
 const NewsController = require('../controllers/news');
 
-router.get('/', NewsController.news_get_all);
-router.get('/:id', NewsController.news_get);
+router.get('/', auth.withAuth, NewsController.news_get_all);
+router.get('/:id', auth.withAuth, NewsController.news_get);
 
-router.post('/', checkAuth, upload.single('image'), NewsController.news_create);
-router.post('/comment', checkAuth, NewsController.news_comment_create);
-router.put('/comment/:id', checkAuth, NewsController.news_comment_edit);
-router.delete('/comment/:id', checkAuth, NewsController.news_comment_delete);
+router.post('/', auth.checkAuth, upload.single('image'), NewsController.news_create);
+router.post('/comment', auth.checkAuth, NewsController.news_comment_create);
+router.put('/comment/:id', auth.checkAuth, NewsController.news_comment_edit);
+router.delete('/comment/:id', auth.checkAuth, NewsController.news_comment_delete);
 
-router.post('/vote', checkAuth, NewsController.news_vote);
+router.post('/vote', auth.checkAuth, NewsController.news_vote);
 
-router.delete('/:id', checkAuth, NewsController.news_delete);
-router.put('/:id', checkAuth, upload.single('image'), NewsController.news_put);
+router.delete('/:id', auth.checkAuth, NewsController.news_delete);
+router.put('/:id', auth.checkAuth, upload.single('image'), NewsController.news_put);
 
 module.exports = router;

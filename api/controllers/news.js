@@ -7,10 +7,18 @@ const wss = require('../helpers/ws');
 // Fetch all news
 exports.news_get_all = (req, res) => {
     // Get all news, and unselect votes list
-    News.find({}).select('-votes').exec()
+    console.log(req.userData.userId);
+    News.find({}).sort('-created_at').exec()
     .then((news) => {
         if(news) {
-            res.json(news);
+            //const isVoted = news.comments.findIndex((elem) => elem.user === req.userId);
+            const newsItems = news.map((value) => {
+                const item = {...value._doc, isVoted: value.votes.findIndex((elem) => elem.user == req.userData.userId) !== -1};
+                delete item.votes;
+                return item;
+            });
+           
+            res.json(newsItems);
         } else {
             res.status(500);
         }
@@ -22,10 +30,12 @@ exports.news_get_all = (req, res) => {
 
 // Fetch a news-item based on id
 exports.news_get = (req, res) => {
-    News.findOne({_id: req.params.id}).select('-votes').exec()
+    News.findOne({_id: req.params.id}).exec()
     .then((news) => {
         if(news) {
-            res.json(news);
+            const item = {...news._doc, isVoted: news.votes.findIndex((elem) => elem.user == req.userData.userId) !== -1};
+            delete item.votes;
+            res.json(item);
         } else {
             res.status(500);
         }
@@ -46,7 +56,7 @@ exports.news_create = (req, res) => {
     // Create new news
     const news = new News({
         id: new mongoose.Types.ObjectId(),
-        image: req.headers.host + "/images/" + req.file.filename,
+        image: 'http://' + req.headers.host + "/images/" + req.file.filename,
         ...req.body,
     });
     news.save().then((result) => {
