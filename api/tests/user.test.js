@@ -2,13 +2,12 @@ const mongoose = require('mongoose');
 const User = require('../models/user');
 const controller = require('../controllers/user');
 const http_mocks = require('node-mocks-http');
+require('dotenv').config();
 
 const db = mongoose.connect(
-    'mongodb://andorr:' + '1234abcd' + '@ds046027.mlab.com:46027/tdat2003_testing', 
+    'mongodb://andorr:' + process.env.MONGODB_PASSWORD + '@ds046027.mlab.com:46027/tdat2003_testing', 
     {useNewUrlParser: true}
 );
-
-process.env.JWT_KEY = "EA102B8F9324A5925A917A7EDFC54E9521EB0BDD52A27D251C1B1C00EE83D16A";
 
 const email = 'andershallemiversen@hotmail.com';
 const password = '1234abcd';

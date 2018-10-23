@@ -2,12 +2,13 @@ const mongoose = require('mongoose');
 const News = require('../models/user');
 const controller = require('../controllers/news');
 const http_mocks = require('node-mocks-http');
+require('dotenv').config();
 
 // Test Data
 const testData = require('./newsTestData');
 
 const db = mongoose.connect(
-    'mongodb://andorr:' + '1234abcd' + '@ds046027.mlab.com:46027/tdat2003_testing', 
+    'mongodb://andorr:' + process.env.MONGODB_PASSWORD + '@ds046027.mlab.com:46027/tdat2003_testing', 
     {useNewUrlParser: true}
 );
 
