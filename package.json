@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Assignment in TDAT2003",
   "main": "index.js",
+  "engines" : { 
+    "node" : ">=8.0.0 <11.0.0" 
+  },
   "scripts": {
     "test": "jest",
     "start": "nodemon server.js"
