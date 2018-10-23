@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 // Create a new user
-exports.user_create = (req, res, next) => {
+exports.user_create = (req, res) => {
 
     // Check if user with given email is already registered
     User.find({email: req.body.email}).exec()
@@ -43,7 +43,7 @@ exports.user_create = (req, res, next) => {
 };
 
 // Login
-exports.user_login = (req, res, next) => {
+exports.user_login = (req, res) => {
     // Check if user exists
     User.find({email: req.body.email}).select('+password').exec()
     .then((user) => {

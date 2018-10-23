@@ -7,13 +7,13 @@ const wss = require('../helpers/ws');
 // Fetch all news
 exports.news_get_all = (req, res) => {
     // Get all news, and unselect votes list
-    console.log(req.userData.userId);
     News.find({}).sort('-created_at').exec()
     .then((news) => {
         if(news) {
             //const isVoted = news.comments.findIndex((elem) => elem.user === req.userId);
+            const userId = (req.userData)? req.userData.userId : '';
             const newsItems = news.map((value) => {
-                const item = {...value._doc, isVoted: value.votes.findIndex((elem) => elem.user == req.userData.userId) !== -1};
+                const item = {...value._doc, isVoted: value.votes.findIndex((elem) => elem.user == userId) !== -1};
                 delete item.votes;
                 return item;
             });
