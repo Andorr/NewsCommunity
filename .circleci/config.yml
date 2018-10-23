@@ -36,4 +36,10 @@ jobs:
       # run tests!
       - run: npm test
 
+deployment:
+  prod:
+    branch: master
+    heroku:
+      appname: foo-bar-123
+
 
