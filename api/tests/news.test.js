@@ -2,10 +2,12 @@ const mongoose = require('mongoose');
 const News = require('../models/news');
 const controller = require('../controllers/news');
 const http_mocks = require('node-mocks-http');
+const {EventEmitter} = require('events');
 require('dotenv').config();
 
 // Test Data
-const testData = require('./newsTestData');
+const sampleData = require('./newsTestData');
+const testData = sampleData.data;
 let newsId = null;
 
 const db = mongoose.connect(
@@ -14,10 +16,10 @@ const db = mongoose.connect(
 );
 
 // requests and reponses
-const buildResponse = () => (http_mocks.createResponse({eventEmitter: require('events').EventEmitter}));
+const buildResponse = () => (http_mocks.createResponse({eventEmitter: EventEmitter}));
 const getAllNewsReq = ({method: 'GET', url: 'news/'});
-const getNewsItemReq = (id) => ({method: 'GET', url: 'news/:id', params: {id: id}, userData: {}});
-
+const getNewsItemReq = (id) => ({method: 'GET', url: 'news/:id', params: {id: id}});
+const createNewsRequest = (data) => ({method: 'POST', url: 'news/', body: {...data}, file: {fileName: data.image}});
 // Tell mongodb to use javascript Promises
 mongoose.Promise = global.Promise;
 
@@ -33,6 +35,7 @@ describe('Testing user controller', () => {
                     ...n,
                 });
                 
+                // Create new data
                 await news.save().then((newsItem) => {
                     testData[count].id = newsItem._id;
                     count++;
@@ -48,25 +51,31 @@ describe('Testing user controller', () => {
         });
     });
      
-    afterAll(async (done) => {
+    afterAll((done) => {
         // Delete all data
-        await News.deleteMany({});
+        News.deleteMany({})
+        .then((err) => {
+            const { connections } = mongoose;
+            for (const con of connections) {
+                return con.close();
+            }
+            return mongoose.disconnect();
+        })
 
         // Disconnect
-        const { connections } = mongoose;
-        for (const con of connections) {
-            return con.close();
-        }
-        return mongoose.disconnect();
+        
     });
      
     test('Tests sort', (done) => {
         News.find({}, (err, news) => {
+            // Check data
             expect(news.length).toBe(testData.length);
 
+            // Create request
             const response = buildResponse();
             const request = http_mocks.createRequest(getAllNewsReq);
             response.on('end', () => {
+                // Check data length and if sorted
                 const data = JSON.parse(response._getData());
                 expect(data.length).toBe(testData.length);
                 expect(isSorted(data)).toBeTruthy();
@@ -78,21 +87,47 @@ describe('Testing user controller', () => {
     });
 
     test('Test get specific item', (done) => {
-       /*  const item = testData[0];
-        console.log(item);
+        News.findOne({}, (err, news) => {
+            // Create request
+            const response = buildResponse();
+            const request = http_mocks.createRequest(getNewsItemReq(news.id));
+            response.on('end', () => {
+                // Check if response data is identical to the given news-data
+                const data = JSON.parse(response._getData());
+                const status = response.statusCode;
+                expect(status).toBe(200);
+                expect(data.title).toBe(news.title);
+                expect(data.content).toBe(news.content);
+                expect(data.category).toBe(news.category);
+                expect(data.importance).toBe(news.importance);
+                done();
+            });
 
-        const response = buildResponse();
-        const request = http_mocks.createRequest(getNewsItemReq(item.id));
-        response.on('end', () => {
-            expect(response.statusCode).toBe(200);
-            const data = JSON.parse(response._getData());
-            expect(data.length).toBe(1);
-            expect(data.title).toBe(item.title);
-            done();
+            controller.news_get(request,response);
         });
+    });
 
-        controller.news_get(request,response); */
-        done();
+    test('Create news item', (done) => {
+        const item = sampleData.extra;
+        
+        // Create request
+        const response = buildResponse();
+        const request = http_mocks.createRequest(createNewsRequest(item));
+        response.on('end', () => {
+            const status = response.statusCode;
+            const data = JSON.parse(response._getData());
+            expect(status).toBe(201);
+            expect(data.title).toBe(item.title);
+            expect(data.content).toBe(item.content);
+
+            News.find({}, (err, news) => {
+                expect(news.length).toBe(3);
+                done();
+            });
+            
+        });
+        
+        controller.news_create(request, response);
     });
 });
 

@@ -10,7 +10,6 @@ exports.news_get_all = (req, res) => {
     News.find({}).sort('-created_at').exec()
     .then((news) => {
         if(news) {
-            //const isVoted = news.comments.findIndex((elem) => elem.user === req.userId);
             const userId = (req.userData)? req.userData.userId : '';
             const newsItems = news.map((value) => {
                 const item = {...value._doc, isVoted: value.votes.findIndex((elem) => elem.user == userId) !== -1};
@@ -34,12 +33,9 @@ exports.news_get = (req, res) => {
     .then((news) => {
         if(news) {
             const userId = req.userData ? req.userData.userId : null;
-            console.log("HELLO");
             const item = {...news._doc, isVoted: news.votes.findIndex((elem) => elem.user == userId) !== -1};
-            console.log("HELLO 2");
             delete item.votes;
-            console.log("HELLO 3");
-            res.status(200).json(item);
+            res.json(item);
         } else {
             res.status(500);
         }
@@ -54,7 +50,7 @@ exports.news_get = (req, res) => {
 exports.news_create = (req, res) => {
     // Check if file was provided
     if(!req.file) {
-        res.status(404).json({error: 'Image was not provided'});
+        res.status(400).json({error: 'Image was not provided'});
         return;
     }
 
