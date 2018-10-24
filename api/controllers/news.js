@@ -33,14 +33,19 @@ exports.news_get = (req, res) => {
     News.findOne({_id: req.params.id}).exec()
     .then((news) => {
         if(news) {
-            const item = {...news._doc, isVoted: news.votes.findIndex((elem) => elem.user == req.userData.userId) !== -1};
+            const userId = req.userData ? req.userData.userId : null;
+            console.log("HELLO");
+            const item = {...news._doc, isVoted: news.votes.findIndex((elem) => elem.user == userId) !== -1};
+            console.log("HELLO 2");
             delete item.votes;
-            res.json(item);
+            console.log("HELLO 3");
+            res.status(200).json(item);
         } else {
             res.status(500);
         }
     })
     .catch((error) => {
+        console.log(error);
         res.status(500).json({message: error.message});
     });
 };
