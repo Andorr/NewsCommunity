@@ -8,12 +8,13 @@ require('dotenv').config();
 const testData = require('./newsTestData');
 
 const db = mongoose.connect(
-    'mongodb://andorr:' + process.env.MONGODB_PASSWORD + '@ds046027.mlab.com:46027/tdat2003_testing', 
+    process.env.MONGODB_TEST_DATABASE_URL, 
     {useNewUrlParser: true}
 );
 
 // requests and reponses
 const buildResponse = () => (http_mocks.createResponse({eventEmitter: require('events').EventEmitter}));
+const getNewsRequest = (http_mocks.createRequest())
 
 // Tell mongodb to use javascript Promises
 mongoose.Promise = global.Promise;

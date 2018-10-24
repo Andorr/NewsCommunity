@@ -6,9 +6,7 @@ const WebSocket = require('ws');
 
 
 const db = mongoose.connect(
-    'mongodb://andorr:' +
-    process.env.MONGODB_PASSWORD +
-    '@ds243812.mlab.com:43812/tdat2003_oving03', 
+    process.env.MONGODB_DATABASE_URL, 
     {useNewUrlParser: true}
 );
 

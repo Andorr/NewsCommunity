@@ -5,7 +5,7 @@ const http_mocks = require('node-mocks-http');
 require('dotenv').config();
 
 const db = mongoose.connect(
-    'mongodb://andorr:' + process.env.MONGODB_PASSWORD + '@ds046027.mlab.com:46027/tdat2003_testing', 
+    process.env.MONGODB_TEST_DATABASE_URL, 
     {useNewUrlParser: true}
 );
 

@@ -1,8 +1,11 @@
+// @flow
+
 const http = require('http');
 const wss = require('./api/helpers/ws');
-require('dotenv').config();
+const dotenv = require('dotenv');
+dotenv.config();
 
-const port = process.env.PORT || 8080;
+let port: any = 8080;
 
 const server = http.createServer(require('./app'));
 wss.init(server);
