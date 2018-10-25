@@ -49,15 +49,18 @@ exports.news_get = (req, res) => {
 // Create a new news-item
 exports.news_create = (req, res) => {
     // Check if file was provided
-    if(!req.file) {
+    if(!req.file && !req.body.image_link) {
         res.status(400).json({error: 'Image was not provided'});
         return;
     }
 
+    // Link to uploaded/given image
+    const imageLink = (req.file)? 'http://' + req.headers.host + "/images/" + req.file.filename : req.body.image_link;
+
     // Create new news
     const news = new News({
         id: new mongoose.Types.ObjectId(),
-        image: 'http://' + req.headers.host + "/images/" + req.file.filename,
+        image: imageLink,
         ...req.body,
     });
     news.save().then((result) => {
@@ -105,11 +108,17 @@ exports.news_put = (req, res) => {
             if(req.file) {
                 news.image = req.headers.host + "/images/" + req.file.filename;
             }
+            else if(req.body.image_link) {
+                news.image = req.body.image_link;
+            }
             if(req.body.category !== undefined) {
                 news.category = req.body.category;
             }
             if(req.body.importance !== undefined) {
                 news.importance = req.body.importance;
+            }
+            if(req.body.subtitle !== undefined) {
+                news.subtitle = req.body.subtitle;
             }
             news.save((error, updatedNews) => {
                 if(error) {

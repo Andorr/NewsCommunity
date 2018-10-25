@@ -7,6 +7,7 @@ const VoteSchema = require('./vote').VoteSchema;
 
 const newsModel = new Schema({
     title: {type: String, required: true},
+    subtitle: {type: String, required: false},
     content: {type: String, required: true},
     created_at: {type: Date, required: true, default: Date.now},
     image: {type: String, required: true},
