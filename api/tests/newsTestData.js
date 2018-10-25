@@ -17,9 +17,9 @@ module.exports = {
         }
     ],
     user: {
-        email: 'andershallemiversen@hotmail.com',
+        email: 'test.testensen@test.com',
         password: '1234abcd',
-        nickname: 'andorr',
+        nickname: 'testity',
     },
     extra: {
         title: 'Er C++ raskere enn C?',

@@ -40,28 +40,21 @@ describe('Testing user controller', () => {
     });
      
     test('Create user', (done) => {
-     
-        // Get all users, should return 0
-        User.find({}, (err, users) => {
-            expect(users.length).toBe(0);
-
-            // Create requests and response
-            const response = buildResponse();
-            const request = http_mocks.createRequest(createUserRequest);
-            response.on('end', () => {
-                expect(response.statusCode).toBe(201);
-                // Check if user was created
-                User.find({}, (err, users) => {
-                    expect(users.length).toBe(1);
-                    expect(users[0].email === email).toBeTruthy();
-                    expect(users[0].nickname === nickname).toBeTruthy();
-                    done();
-                });
+        // Create requests and response
+        const response = buildResponse();
+        const request = http_mocks.createRequest(createUserRequest);
+        response.on('end', () => {
+            expect(response.statusCode).toBe(201);
+            // Check if user was created
+            User.findOne({email: email}, (err, user) => {
+                expect(user.email === email).toBeTruthy();
+                expect(user.nickname === nickname).toBeTruthy();
+                done();
             });
-            
-            // Send request
-            controller.user_create(request, response);
         });
+        
+        // Send request
+        controller.user_create(request, response);
     });
 
 
@@ -98,8 +91,8 @@ describe('Testing user controller', () => {
                 expect(response.statusCode).toBe(200);
 
                 // Check if user was deleted
-                User.find({}, (err, users) => {
-                    expect(users.length).toBe(0);
+                User.findById(userId, (err, users) => {
+                    expect(users).toBeNull();
                     done();
                 });
             });

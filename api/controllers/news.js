@@ -147,7 +147,7 @@ exports.news_comment_create = (req, res) => {
                     res.status(500).json({message: error.message});
                 } else {
                     wss.send(news); // Send news-item through the webserver
-                    res.status(200).json(comment);
+                    res.status(201).json(news);
                 }
             });
         }
