@@ -75,6 +75,7 @@ exports.news_create = async (req, res) => {
         id: new mongoose.Types.ObjectId(),
         image: imageLink,
         author: {
+            user: user ? user.id : null,
             email: user ? user.email : null,
             nickname: user ? user.nickname : null,
         },

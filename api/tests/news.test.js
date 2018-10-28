@@ -52,6 +52,7 @@ describe('Testing user controller', () => {
             let resultUser = null;
             await newUser.save().then((result) => {
                 user.id = result._id;
+                sampleData.extra.author.id = user.id;
                 resultUser = result;
             });
 
@@ -60,6 +61,7 @@ describe('Testing user controller', () => {
                     id: new mongoose.Types.ObjectId(),
                     image: n.image,
                     author: {
+                        user: user.id,
                         email: user.email,
                         nickname: user.nickname,
                     },
@@ -174,6 +176,7 @@ describe('Testing user controller', () => {
         const news = new News({
             id: new mongoose.Types.ObjectId(),
             author: {
+                user: user.id,
                 email: user.email,
                 nickname: user.nickname,
             },
