@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 // Schemas
 const CommentSchema = require('./comment').CommentSchema;
 const VoteSchema = require('./vote').VoteSchema;
+const UserSchema = require('./user').schema;
 
 const newsModel = new Schema({
     title: {type: String, required: true},
@@ -22,6 +23,11 @@ const newsModel = new Schema({
     vote_count: {type: Number, default: 0},
     votes: [VoteSchema],
     comments: [CommentSchema],
+
+    author: {
+        email: {type: String, required: false},
+        nickname: {type: String, required: false},
+    },
 });
 module.exports = mongoose.model('news', newsModel);
 

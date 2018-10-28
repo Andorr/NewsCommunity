@@ -27,5 +27,9 @@ module.exports = {
         image: '1537344203174HomeTown.png',
         category: 'news',
         importance: 2,
+        author: {
+            email: 'test.testensen@test.com',
+            nickname: 'testity'
+        }
     }
 }

@@ -48,14 +48,21 @@ describe('Testing user controller', () => {
                 password: user.password,
                 nickname: user.nickname,
             });
+
+            let resultUser = null;
             await newUser.save().then((result) => {
                 user.id = result._id;
+                resultUser = result;
             });
 
             testData.forEach(async (n) => {
                 const news = new News({
                     id: new mongoose.Types.ObjectId(),
                     image: n.image,
+                    author: {
+                        email: user.email,
+                        nickname: user.nickname,
+                    },
                     ...n,
                 });
                 
@@ -147,6 +154,9 @@ describe('Testing user controller', () => {
             expect(status).toBe(201);
             expect(data.title).toBe(item.title);
             expect(data.content).toBe(item.content);
+            expect(data.author).toBeDefined();
+            expect(data.author.email).toBe(item.author.email);
+            expect(data.author.nickname).toBe(item.author.nickname);
 
             News.find({}, (err, news) => {
                 expect(news.length).toBe(3);
@@ -163,6 +173,10 @@ describe('Testing user controller', () => {
         const item = sampleData.extra;
         const news = new News({
             id: new mongoose.Types.ObjectId(),
+            author: {
+                email: user.email,
+                nickname: user.nickname,
+            },
             ...item,
         }).save().then((newsItem) => {
 
@@ -255,6 +269,8 @@ describe('Testing user controller', () => {
 
         // Create comment
         News.findById(item.id, (err, newsItem) => {
+            expect(err).toBeNull();
+
             newsItem.comments.push(comment);
             newsItem.save().then((news) => {
                 expect(news).toBeDefined();
@@ -293,6 +309,8 @@ describe('Testing user controller', () => {
 
         // Create comment to delete
         News.findById(item.id, (err, newsItem) => {
+            expect(err).toBeNull();
+
             newsItem.comments.push(comment);
             newsItem.save().then((news) => {
                 expect(news).toBeDefined();

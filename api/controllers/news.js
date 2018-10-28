@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const News = require('../models/news');
+const User = require('../models/user');
 const wss = require('../helpers/ws');
 // ----- NEWS -------
 
@@ -47,7 +48,7 @@ exports.news_get = (req, res) => {
 };
 
 // Create a new news-item
-exports.news_create = (req, res) => {
+exports.news_create = async (req, res) => {
     // Check if file was provided
     if(!req.file && !req.body.image_link) {
         res.status(400).json({error: 'Image was not provided'});
@@ -57,10 +58,26 @@ exports.news_create = (req, res) => {
     // Link to uploaded/given image
     const imageLink = (req.file)? 'http://' + req.headers.host + "/images/" + req.file.filename : req.body.image_link;
 
+    const userId = (req.userData? req.userData.userId : null);
+    console.log(userId);
+    let user = null;
+    if(userId) {
+        await User.findById(userId)
+        .then((result) => {
+            console.log(result);
+            user = result;
+        });
+    }
+    
+
     // Create new news
     const news = new News({
         id: new mongoose.Types.ObjectId(),
         image: imageLink,
+        author: {
+            email: user ? user.email : null,
+            nickname: user ? user.nickname : null,
+        },
         ...req.body,
     });
     news.save().then((result) => {
