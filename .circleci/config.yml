@@ -40,6 +40,6 @@ deployment:
   prod:
     branch: master
     heroku:
-      appname: sys-ut-news-app
+      appname: sys-ut-news-api
 
 
