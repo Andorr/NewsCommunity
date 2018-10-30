@@ -30,9 +30,7 @@ exports.user_create = (req, res) => {
                         nickname: req.body.nickname,
                     });
                     user.save().then((result) => {
-                        res.status(201).json({
-                            message: 'user created',
-                        });
+                        res.status(201).json(result);
                     }).catch((err) => {
                         res.status(500).json({message: err.message})
                     });
@@ -96,3 +94,20 @@ exports.user_delete = (req, res, next) => {
     })
     .catch((error) => res.status(500).json({message: error.message}))
 };
+
+// Get user information
+exports.user_get = (req, res) => {
+    
+    // Get User
+    User.findById(req.userData.userId, (err, user) => {
+        if(err) {
+            res.status(403).json({message: err.message});
+        } else {
+            res.status(200).json(user);
+        }
+    })
+    .catch((error) => {
+        res.status(500).json({message: error.message})
+    });
+
+}

@@ -12,12 +12,14 @@ const db = mongoose.connect(
 const email = 'andershallemiversen@hotmail.com';
 const password = '1234abcd';
 const nickname = 'andorr';
+let accountId = null;
 
 // requests and reponses
 const buildResponse = () => (http_mocks.createResponse({eventEmitter: require('events').EventEmitter}));
 const createUserRequest = {method: 'POST', url: 'account/signup', body: {email: email, password: password, nickname: nickname}};
 const loginRequest = {method: 'POST', url: 'account/login', body: {email: email, password: password}};
 const deleteRequest = (userId) => ({method: 'DELETE', url: 'account/', params: {userId: userId}, userData: {userId: userId}});
+const getUserRequest = (id) => ({method: 'GET', url: 'account/', userData: {userId: id}});
 
 // Tell mongodb to use javascript Promises
 mongoose.Promise = global.Promise;
@@ -49,6 +51,7 @@ describe('Testing user controller', () => {
             User.findOne({email: email}, (err, user) => {
                 expect(user.email === email).toBeTruthy();
                 expect(user.nickname === nickname).toBeTruthy();
+                accountId = user._id;
                 done();
             });
         });
@@ -73,6 +76,28 @@ describe('Testing user controller', () => {
         });
 
         controller.user_login(request, response);
+    });
+
+    test('Get user info', (done) => {
+        // Get user id
+        User.findOne({}, (err, user) => {
+            expect(err).toBeNull();
+            const userId = user._id; // UserId
+
+            // Mock request and response
+            const response = buildResponse();
+            const request = http_mocks.createRequest(getUserRequest(userId));
+            response.on('end', () => {
+                expect(response.statusCode).toBe(200);
+                const data = JSON.parse(response._getData());
+                expect(data.nickname).toBe(user.nickname);
+                expect(data.email).toBe(user.email);
+                done();
+            });
+
+            controller.user_get(request, response);
+        });
+        
     });
 
     test('Delete user', (done) => {

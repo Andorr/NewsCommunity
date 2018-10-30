@@ -52,7 +52,7 @@ describe('Testing user controller', () => {
             let resultUser = null;
             await newUser.save().then((result) => {
                 user.id = result._id;
-                sampleData.extra.author.id = user.id;
+                sampleData.extra.author.id = user.id;   
                 resultUser = result;
             });
 
