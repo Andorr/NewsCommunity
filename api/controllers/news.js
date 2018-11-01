@@ -257,11 +257,11 @@ exports.news_vote = (req, res) => {
                             res.status(500).json({message: error.message});
                         } else {
                             wss.send(news); // Send news-item through the webserver
-                            res.status(201).json(vote);
+                            res.status(201).json(news);
                         }
                     });
                 } else {
-                    res.status(404).send("");
+                    res.status(400).json({message: 'The given user has already voted for this article'});
                 }
             } else {
                 // Delete item
@@ -273,11 +273,11 @@ exports.news_vote = (req, res) => {
                             res.status(500).json({message: error.message});
                         } else {
                             wss.send(news); // Send news-item through the webserver
-                            res.status(200).json({message: 'deleted'});
+                            res.status(200).json(news);
                         }
                     });
                 } else {
-                    res.status(404).send("");
+                    res.status(400).json({message: 'The given user has not voted for this article'});
                 }
             }
         }
