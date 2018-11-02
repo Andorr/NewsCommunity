@@ -19,12 +19,14 @@ class WS {
 
         // On client connected
         this.wss.on('connection', (ws) => {
+            console.log('Client connected');
 
-            ws.on('message', (msg) => {
+            ws.on('message', (messageData) => {
+                const msg = JSON.parse(messageData);
             
                 // If message type is auth, save user id
                 if(msg && msg.type === AUTH) {
-                    ws.user = msg.id;
+                    ws.id = msg.userId;
                 } 
                 // If message type is message, send to all clients
                 else if(msg && msg.type === MESSAGE) {
@@ -34,28 +36,32 @@ class WS {
                 }
 
             });
+            ws.on('disconnect', () => {
+                delete this.clients[ws.id];
+            })
         });
     }
 
     // Send message to all client
-    send(msg: Object) {
+    send(msg) {
+
         if(this.wss === null || !msg) {
             return;
         }
-        // For every 
-        const message: Object = msg;
+        // For every
+        const message: Object = JSON.parse(JSON.stringify(msg)); // Makes a deep copy, which is not readonly
         this.wss.clients.forEach((client) => {
 
             // Check if client has voted for the news item
-            if(message.votes && client.user) {
-                message.isVoted = message.votes.indexOf((vote) => vote.user === client.user) >= 0;
+            if(message.votes && client.id) {
+                message.isVoted = message.votes.findIndex((vote) => vote.user === client.id) >= 0;
             } else {
                 message.isVoted = false;
             }
             
             // Send message
-            console.log("Sending: ", message);
-            client.send(JSON.stringify(message));
+            const stringified = JSON.stringify(message);
+            client.send(stringified);
         });
     }
 }
