@@ -245,40 +245,32 @@ exports.news_vote = (req, res) => {
             const index = news.votes.findIndex((elem) => elem.user == req.userData.userId);
 
             // If vote is an upvote
-            if(req.body.upvote === true) {
-                if(index === -1) {
-                    const vote = {
-                        user: req.userData.userId,
-                    };
-                    news.votes.push(vote);
-                    news.vote_count += 1;
-                    news.save((error, success) => {
-                        if(error) {
-                            res.status(500).json({message: error.message});
-                        } else {
-                            wss.send(news); // Send news-item through the webserver
-                            res.status(201).json(news);
-                        }
-                    });
-                } else {
-                    res.status(400).json({message: 'The given user has already voted for this article'});
-                }
+            if(index === -1) {
+                const vote = {
+                    user: req.userData.userId,
+                };
+                news.votes.push(vote);
+                news.vote_count += 1;
+                news.save((error, success) => {
+                    if(error) {
+                        res.status(500).json({message: error.message});
+                    } else {
+                        wss.send(news); // Send news-item through the webserver
+                        res.status(201).json(news);
+                    }
+                });
             } else {
                 // Delete item
-                if(index !== -1) {
-                    news.votes.splice(index,1);
-                    news.vote_count -= 1;
-                    news.save((error, success) => {
-                        if(error) {
-                            res.status(500).json({message: error.message});
-                        } else {
-                            wss.send(news); // Send news-item through the webserver
-                            res.status(200).json(news);
-                        }
-                    });
-                } else {
-                    res.status(400).json({message: 'The given user has not voted for this article'});
-                }
+                news.votes.splice(index,1);
+                news.vote_count -= 1;
+                news.save((error, success) => {
+                    if(error) {
+                        res.status(500).json({message: error.message});
+                    } else {
+                        wss.send(news); // Send news-item through the webserver
+                        res.status(200).json(news);
+                    }
+                });
             }
         }
     });

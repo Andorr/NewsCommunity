@@ -18,6 +18,7 @@ class WS {
             console.log("Connected");
             ws.on('message', (msg) => {
                 this.wss.clients.forEach((client) => {
+                    console.log(client);
                     if(client != ws) {
                         client.send(msg);
                     }
