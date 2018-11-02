@@ -54,7 +54,8 @@ class WS {
             }
             
             // Send message
-            client.send(JSON.stringify(msg));
+            console.log("Sending: ", message);
+            client.send(JSON.stringify(message));
         });
     }
 }
