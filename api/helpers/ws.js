@@ -42,14 +42,15 @@ class WS {
         if(this.wss === null || !msg) {
             return;
         }
-        // For every client
+        // For every 
+        const message: Object = msg;
         this.wss.clients.forEach((client) => {
 
             // Check if client has voted for the news item
-            if(msg.votes && client.user) {
-                msg.isVoted = msg.votes.indexOf((vote) => vote.user === client.user) >= 0;
+            if(message.votes && client.user) {
+                message.isVoted = message.votes.indexOf((vote) => vote.user === client.user) >= 0;
             } else {
-                msg.isVoted = false;
+                message.isVoted = false;
             }
             
             // Send message
