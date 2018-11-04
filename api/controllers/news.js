@@ -7,14 +7,32 @@ const wss = require('../helpers/ws');
 
 // Fetch all news
 exports.news_get_all = (req, res) => {
+
+    // Create query
+    let query = {};
+    const user = req.query.user;
+
+    // If user parameter is provided...
+    if(user) {
+        // Check if provided user is authenticated
+        const userId = req.userData && req.userData.userId? req.userData.userId.toString() : '';
+        if(user !== userId) {
+            res.status(403).json({message: 'Forbidden! Not valid user!'});
+            return;
+        }
+        query = {'author.user': user}; // Change query to get user-created data
+    }
+
     // Get all news, and unselect votes list
-    News.find({}).sort('-created_at').exec()
+    News.find(query).sort('-created_at').limit(20).exec()
     .then((news) => {
         if(news) {
+
+            // Checks if user has voted for any of the news items
             const userId = (req.userData)? req.userData.userId : '';
             const newsItems = news.map((value) => {
                 const item = {...value._doc, isVoted: value.votes.findIndex((elem) => elem.user == userId) !== -1};
-                delete item.votes;
+                delete item.votes; // Deletes the votes list
                 return item;
             });
            
@@ -35,7 +53,7 @@ exports.news_get = (req, res) => {
         if(news) {
             const userId = req.userData ? req.userData.userId : null;
             const item = {...news._doc, isVoted: news.votes.findIndex((elem) => elem.user == userId) !== -1};
-            delete item.votes;
+            delete item.votes; // Deletes the votes list
             res.json(item);
         } else {
             res.status(500);
