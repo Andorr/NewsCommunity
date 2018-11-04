@@ -59,16 +59,13 @@ exports.news_create = async (req, res) => {
     const imageLink = (req.file)? 'http://' + req.headers.host + "/images/" + req.file.filename : req.body.image_link;
 
     const userId = (req.userData? req.userData.userId : null);
-    console.log(userId);
     let user = null;
     if(userId) {
         await User.findById(userId)
         .then((result) => {
-            console.log(result);
             user = result;
         });
     }
-    
 
     // Create new news
     const news = new News({
@@ -84,7 +81,7 @@ exports.news_create = async (req, res) => {
     news.save().then((result) => {
         wss.send(result); // Send news-item through the webserver
         res.status(201);
-        res.json(news);
+        res.json(result);
     })
     .catch((error) => {
         res.status(500);
@@ -94,17 +91,32 @@ exports.news_create = async (req, res) => {
 
 // Delete news, all users can delete news
 exports.news_delete = (req, res) => {
-    // Delete item
-    News.deleteOne({_id: req.params.id}).exec()
-    .then((result) => {
-        if(result) {
-            res.status(200).json({message: 'deleted'});
-        } else {
-            res.status(500);
+
+    News.findById(req.params.id, (err, news) => {
+        if(err) {
+            res.status(500).json({message: err});
         }
-    })
-    .catch((error) => {
-        res.status(500).json({message: error.message});
+
+        // Check if user is the valid user (author)
+        const userId = req.userData && req.userData.userId ? req.userData.userId.toString() : null;
+        const authorId = news.author && news.author.user ? news.author.user.toString() : null;
+        if(userId !== authorId) {
+            res.status(403).json({message: 'Forbidden! Not valid user!'});
+            return;
+        }
+
+        // Delete item
+        News.deleteOne({_id: req.params.id}).exec()
+        .then((result) => {
+            if(result) {
+                res.status(200).json({message: 'deleted'});
+            } else {
+                res.status(500);
+            }
+        })
+        .catch((error) => {
+            res.status(500).json({message: error.message});
+        });
     });
 };
 
@@ -116,6 +128,14 @@ exports.news_put = (req, res) => {
         if(err) {
             res.status(404).json({error: err.message});
         } else {
+            // Check if user is the valid user (author)
+            const userId = req.userData ? req.userData.userId.toString() : null;
+            const authorId = news.author ? news.author.user.toString() : null;
+            if(userId !== authorId) {
+                res.status(403).json({message: 'Forbidden! Not valid user!'});
+                return;
+            }
+
             // Find changes
             if(req.body.title !== undefined) {
                 news.title = req.body.title;
@@ -138,6 +158,7 @@ exports.news_put = (req, res) => {
             if(req.body.subtitle !== undefined) {
                 news.subtitle = req.body.subtitle;
             }
+            // Save
             news.save((error, updatedNews) => {
                 if(error) {
                     res.status(400).send(error);

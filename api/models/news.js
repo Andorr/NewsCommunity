@@ -25,7 +25,7 @@ const newsModel = new Schema({
     comments: [CommentSchema],
 
     author: {
-        user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false},
+        user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
         email: {type: String, required: false},
         nickname: {type: String, required: false},
     },

@@ -20,10 +20,10 @@ const db = mongoose.connect(
 // requests and reponses
 const buildResponse = () => (http_mocks.createResponse({eventEmitter: EventEmitter}));
 const getAllNewsReq = ({method: 'GET', url: 'news/'});
-const getNewsItemReq = (id) => ({method: 'GET', url: 'news/:id', params: {id: id}});
+const getNewsItemReq = (id, userId) => ({method: 'GET', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
 const createNewsRequest = (data) => ({method: 'POST', url: 'news/', body: {...data}, file: {fileName: data.image}});
-const deleteNewsItemReq = (id) => ({method: 'DELETE', url: 'news/:id', params: {id: id}});
-const updateNewsItemReq = (id, body) => ({method: 'PUT', url: 'news/:id', params: {id: id}, body: body});
+const deleteNewsItemReq = (id, userId) => ({method: 'DELETE', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
+const updateNewsItemReq = (id, body, userId) => ({method: 'PUT', url: 'news/:id', params: {id: id}, body: body, userData: {userId: userId}});
 const createCommentRequest = (id, comment) => ({method: 'POST', url: 'news/comment/', body: {news: id, comment: comment}, userData: {userId: '1234', nickname: 'asdf'}});
 const updateCommentRequest = (newsId, commentId, comment) => ({method: 'POST', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId, comment: comment}, userData: {userId: '1234', nickname: 'asdf'}});
 const deleteCommentRequest = (newsId, commentId) => ({method: 'DELETE', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId}, userData: {userId: '1234', nickname: 'asdf'}});
@@ -146,10 +146,11 @@ describe('Testing user controller', () => {
     // CREATE
     test('Create news item', (done) => {
         const item = sampleData.extra;
+        item.author.user = user.id;
         
         // Create request
         const response = buildResponse();
-        const request = http_mocks.createRequest(createNewsRequest(item));
+        const request = http_mocks.createRequest(createNewsRequest(item, user.id));
         response.on('end', () => {
             const status = response.statusCode;
             const data = JSON.parse(response._getData());
@@ -175,17 +176,16 @@ describe('Testing user controller', () => {
         const item = sampleData.extra;
         const news = new News({
             id: new mongoose.Types.ObjectId(),
+            ...item,
             author: {
                 user: user.id,
                 email: user.email,
                 nickname: user.nickname,
             },
-            ...item,
         }).save().then((newsItem) => {
-
             // Create request
             const response = buildResponse();
-            const request = http_mocks.createRequest(deleteNewsItemReq(newsItem._id));
+            const request = http_mocks.createRequest(deleteNewsItemReq(newsItem._id, user.id));
             response.on('end', () => {
                 const status = response.statusCode;
                 const data = JSON.parse(response._getData());
@@ -213,7 +213,7 @@ describe('Testing user controller', () => {
         
         // Create request
         const response = buildResponse();
-        const request = http_mocks.createRequest(updateNewsItemReq(item.id, body));
+        const request = http_mocks.createRequest(updateNewsItemReq(item.id, body, user.id));
         response.on('end', () => {
             // Check response status
             const status = response.statusCode;
