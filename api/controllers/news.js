@@ -100,7 +100,7 @@ exports.news_delete = (req, res) => {
         // Check if user is the valid user (author)
         const userId = req.userData && req.userData.userId ? req.userData.userId.toString() : null;
         const authorId = news.author && news.author.user ? news.author.user.toString() : null;
-        if(userId !== authorId) {
+        if(userId !== authorId && authorId) {
             res.status(403).json({message: 'Forbidden! Not valid user!'});
             return;
         }
