@@ -4,7 +4,7 @@ module.exports = {
             title: 'Dette er en ny verden!',
             content: 'Forskere har funnet ny funn!',
             image: '1537344203174HomeTown.png',
-            category: 'news',
+            category: 'sport',
             importance: 1,
         },
         {
@@ -25,7 +25,7 @@ module.exports = {
         title: 'Er C++ raskere enn C?',
         content: 'Forskere har funnet ny funn!',
         image: '1537344203174HomeTown.png',
-        category: 'news',
+        category: 'IT',
         importance: 2,
         author: {
             email: 'test.testensen@test.com',
