@@ -215,12 +215,15 @@ exports.news_comment_create = (req, res) => {
                 user_nickname: req.userData.nickname,
             }
             news.comments.push(comment);
+            
             news.save((error, success) => {
                 if(err) {
                     res.status(500).json({message: error.message});
                 } else {
                     wss.send(news); // Send news-item through the webserver
-                    res.status(201).json(comment);
+
+                    const newComment = news.comments[news.comments.length -1];
+                    res.status(201).json(newComment);
                 }
             });
         }
