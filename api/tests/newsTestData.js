@@ -30,6 +30,6 @@ module.exports = {
         author: {
             email: 'test.testensen@test.com',
             nickname: 'testity'
-        }
+        },
     }
 }

@@ -15,7 +15,7 @@ const newsModel = new Schema({
     category: {
         type: String,
         required: true,
-        enum: ['sport', 'culture', 'entertainment', 'politics', 'IT'],
+        enum: ['sport', 'culture', 'entertainment', 'politics', 'IT', 'coding'],
     },
     importance: {type: Number, required: true, enum: [1,2]},
     
