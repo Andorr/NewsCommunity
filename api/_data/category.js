@@ -1,1 +1,0 @@
-export default ['sport', 'culture', 'entertainment', 'politics', 'IT'];

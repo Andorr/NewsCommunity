@@ -4,7 +4,7 @@ const News = require('../models/news');
 const User = require('../models/user');
 const wss = require('../helpers/ws');
 
-import categories from '../_data/category';
+const categories = require('../_data/data').categories;
 
 // ----- NEWS -------
 
@@ -351,5 +351,5 @@ exports.news_vote = (req, res) => {
 
 // ---- CATEGORIES ----
 exports.news_categories = (req, res) => {
-    res.status(200).json(categories);
+    res.status(200).json({categories: categories});
 };

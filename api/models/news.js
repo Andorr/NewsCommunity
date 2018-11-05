@@ -7,7 +7,7 @@ const VoteSchema = require('./vote').VoteSchema;
 const UserSchema = require('./user').schema;
 
 // Category
-import categories from '../_data/category';
+const categories = require('../_data/data').categories;
 
 const newsModel = new Schema({
     title: {type: String, required: true},
