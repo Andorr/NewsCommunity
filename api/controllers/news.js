@@ -82,8 +82,9 @@ exports.news_create = async (req, res) => {
         return;
     }
 
+    console.log(req.file);
     // Link to uploaded/given image
-    const imageLink = (req.file)? 'http://' + req.headers.host + "/images/" + req.file.filename : req.body.image_link;
+    const imageLink = (req.file)? req.file.location : req.body.image_link;
 
     const userId = (req.userData? req.userData.userId : null);
     let user = null;
@@ -171,7 +172,7 @@ exports.news_put = (req, res) => {
                 news.content = req.body.content;
             }
             if(req.file) {
-                news.image = req.headers.host + "/images/" + req.file.filename;
+                news.image = req.file.location;
             }
             else if(req.body.image_link) {
                 news.image = req.body.image_link;
