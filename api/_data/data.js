@@ -1,1 +1,1 @@
-module.exports.categories = ['sport', 'culture', 'entertainment', 'politics', 'IT'];
+module.exports.categories = ['sport', 'culture', 'entertainment', 'politics', 'IT', 'other'];
