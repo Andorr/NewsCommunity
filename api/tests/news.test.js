@@ -25,8 +25,8 @@ const createNewsRequest = (data) => ({method: 'POST', url: 'news/', body: {...da
 const deleteNewsItemReq = (id, userId) => ({method: 'DELETE', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
 const updateNewsItemReq = (id, body, userId) => ({method: 'PUT', url: 'news/:id', params: {id: id}, body: body, userData: {userId: userId}});
 const createCommentRequest = (id, comment) => ({method: 'POST', url: 'news/comment/', body: {news: id, comment: comment}, userData: {userId: '1234', nickname: 'asdf'}});
-const updateCommentRequest = (newsId, commentId, comment) => ({method: 'POST', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId, comment: comment}, userData: {userId: '1234', nickname: 'asdf'}});
-const deleteCommentRequest = (newsId, commentId) => ({method: 'DELETE', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId}, userData: {userId: '1234', nickname: 'asdf'}});
+const updateCommentRequest = (newsId, commentId, comment, userId) => ({method: 'PUT', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId, comment: comment}, userData: {userId: userId, nickname: 'asdf'}});
+const deleteCommentRequest = (newsId, commentId, userId) => ({method: 'DELETE', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId}, userData: {userId: userId, nickname: 'asdf'}});
 const voteNewsItemReq = (newsId, upvote, userId) => ({method: 'POST', url: 'news/vote/', body: {news: newsId, upvote: upvote}, userData: {userId: userId, nickname: 'asdf'}});
 
 // Tell mongodb to use javascript Promises
@@ -270,17 +270,18 @@ describe('Testing user controller', () => {
         };
         const newComment = 'I need help!';
 
-        // Create comment
+        // Find news item and create comment
         News.findById(item.id, (err, newsItem) => {
             expect(err).toBeNull();
 
+            // Create comment
             newsItem.comments.push(comment);
             newsItem.save().then((news) => {
                 expect(news).toBeDefined();
 
                 // Update comment
                 const response = buildResponse();
-                const request = http_mocks.createRequest(updateCommentRequest(item.id, news.comments[0].id, newComment));
+                const request = http_mocks.createRequest(updateCommentRequest(item.id, news.comments[0].id, newComment, user.id));
                 response.on('end', () => {
                     const status = response.statusCode;
                     const data = JSON.parse(response._getData());
@@ -321,7 +322,7 @@ describe('Testing user controller', () => {
                 // Delete comment
                 const commentID = news.comments[0]._id;
                 const response = buildResponse();
-                const request = http_mocks.createRequest(deleteCommentRequest(item.id, commentID));
+                const request = http_mocks.createRequest(deleteCommentRequest(item.id, commentID, user.id));
                 response.on('end', () => {
                     const status = response.statusCode;
                     const data = JSON.parse(response._getData());

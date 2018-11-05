@@ -10,9 +10,10 @@ exports.news_get_all = (req, res) => {
 
     // Create query
     let query = {};
-    const user = req.query.user;
+    
 
     // If user parameter is provided...
+    const user = req.query.user;
     if(user) {
         // Check if provided user is authenticated
         const userId = req.userData && req.userData.userId? req.userData.userId.toString() : '';
@@ -21,6 +22,12 @@ exports.news_get_all = (req, res) => {
             return;
         }
         query = {'author.user': user}; // Change query to get user-created data
+    }
+
+    // If category parameter is provided...
+    const category = req.query.category;
+    if(category) {
+        query['category'] = category;
     }
 
     // Get all news, and unselect votes list
@@ -227,8 +234,19 @@ exports.news_comment_edit = (req, res) => {
         if(err) {
             res.status(500).json({error: err.message});
         } else {
+            // Find comment index
             const commentId = req.params.id;
             const index = news.comments.findIndex((elem) => elem.id == commentId);
+
+            // Check if user is the valid user (author)
+            const userId = req.userData ? req.userData.userId.toString() : null;
+            const authorId = index !== -1 ? news.comments[index].user.toString() : null;
+            if(userId !== authorId) {
+                res.status(403).json({message: 'Forbidden! Not valid user!'});
+                return;
+            }
+
+            // Edit comment
             if(index != -1) {
                 news.comments[index].comment = req.body.comment;
             }
@@ -251,8 +269,19 @@ exports.news_comment_delete = (req, res) => {
         if(err) {
             res.status(500).json({error: err.message});
         } else {
+            // Find comment
             const commentId = req.params.id;
             const index = news.comments.findIndex((elem) => elem.id == commentId);
+
+            // Check if user is the valid user (author)
+            const userId = req.userData ? req.userData.userId.toString() : null;
+            const authorId = index !== -1 ? news.comments[index].user.toString() : null;
+            if(userId !== authorId) {
+                res.status(403).json({message: 'Forbidden! Not valid user!'});
+                return;
+            }
+
+            // Delete comment
             if(index != -1) {
                 news.comments.splice(index,1);
             }
