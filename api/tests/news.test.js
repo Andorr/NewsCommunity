@@ -253,7 +253,7 @@ describe('Testing user controller', () => {
             
             // Check status code and if comment was added
             expect(status).toBe(201);
-            expect(data.comments.findIndex((e) => e.comment === comment) >= 0).toBeTruthy();
+            expect(data.comment === comment).toBeTruthy();
             done();
         });
 
