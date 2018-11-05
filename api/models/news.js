@@ -6,6 +6,9 @@ const CommentSchema = require('./comment').CommentSchema;
 const VoteSchema = require('./vote').VoteSchema;
 const UserSchema = require('./user').schema;
 
+// Category
+import categories from '../_data/category';
+
 const newsModel = new Schema({
     title: {type: String, required: true},
     subtitle: {type: String, required: false},
@@ -15,7 +18,7 @@ const newsModel = new Schema({
     category: {
         type: String,
         required: true,
-        enum: ['sport', 'culture', 'entertainment', 'politics', 'IT', 'coding'],
+        enum: categories,
     },
     importance: {type: Number, required: true, enum: [1,2]},
     

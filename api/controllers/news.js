@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 const News = require('../models/news');
 const User = require('../models/user');
 const wss = require('../helpers/ws');
+
+import categories from '../_data/category';
+
 // ----- NEWS -------
 
 // Fetch all news
@@ -11,7 +14,6 @@ exports.news_get_all = (req, res) => {
     // Create query
     let query = {};
     
-
     // If user parameter is provided...
     const user = req.query.user;
     if(user) {
@@ -345,4 +347,9 @@ exports.news_vote = (req, res) => {
             }
         }
     });
+};
+
+// ---- CATEGORIES ----
+exports.news_categories = (req, res) => {
+    res.status(200).json(categories);
 };
