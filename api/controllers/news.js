@@ -32,23 +32,24 @@ exports.news_get_all = (req, res) => {
         query['category'] = category;
     }
 
+    // If importance parameter is provided
+    const importance = req.query.importance;
+    if(typeof importance !== 'undefined') {
+        query['importance'] = importance;
+    }
+
     // Get all news, and unselect votes list
     News.find(query).sort('-created_at').limit(20).exec()
     .then((news) => {
-        if(news) {
-
-            // Checks if user has voted for any of the news items
-            const userId = (req.userData)? req.userData.userId : '';
-            const newsItems = news.map((value) => {
-                const item = {...value._doc, isVoted: value.votes.findIndex((elem) => elem.user == userId) !== -1};
-                delete item.votes; // Deletes the votes list
-                return item;
-            });
-           
-            res.json(newsItems);
-        } else {
-            res.status(500);
-        }
+        // Checks if user has voted for any of the news items
+        const userId = (req.userData)? req.userData.userId : '';
+        const newsItems = news.map((value) => {
+            const item = {...value._doc, isVoted: value.votes.findIndex((elem) => elem.user == userId) !== -1};
+            delete item.votes; // Deletes the votes list
+            return item;
+        });
+        
+        res.status(200).json(newsItems);
     })
     .catch((error) => {
         res.status(500).json({message: error.message});
@@ -76,13 +77,13 @@ exports.news_get = (req, res) => {
 
 // Create a new news-item
 exports.news_create = async (req, res) => {
+
     // Check if file was provided
     if(!req.file && !req.body.image_link) {
         res.status(400).json({error: 'Image was not provided'});
         return;
     }
 
-    console.log(req.file);
     // Link to uploaded/given image
     const imageLink = (req.file)? req.file.location : req.body.image_link;
 
