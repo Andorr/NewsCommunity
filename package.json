@@ -22,6 +22,10 @@
   },
   "homepage": "https://github.com/Andorr/NewsCommunity#readme",
   "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-flow": "^6.23.0",
     "aws-sdk": "^2.348.0",
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",
