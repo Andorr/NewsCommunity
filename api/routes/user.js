@@ -1,5 +1,7 @@
+// @flow 
 const express = require('express');
-const router = express.Router();
+import {Router} from 'express';
+const router: Router = express.Router();
 
 const UserController = require('../controllers/user');
 const auth = require('../middleware/auth');

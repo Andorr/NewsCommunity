@@ -1,15 +1,17 @@
+// @flow 
 const aws = require('aws-sdk');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
+import type {Multer} from 'multer';
 
 // AWS
-const ENDPOINT_URL = process.env.IMAGE_ENDPOINT || 'ams3.digitaloceanspaces.com';
-const spacesEndpoint = new aws.Endpoint(ENDPOINT_URL);
-const s3 = new aws.S3({
+const ENDPOINT_URL: string = process.env.IMAGE_ENDPOINT || 'ams3.digitaloceanspaces.com';
+const spacesEndpoint: aws.Endpoint = new aws.Endpoint(ENDPOINT_URL);
+const s3: aws.S3 = new aws.S3({
     endpoint: spacesEndpoint
 });
 
-const fileFilter = (req, file, cb) => {
+const fileFilter: Function = (req, file, cb) => {
     if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
         cb(null, true);
     } else {
@@ -17,7 +19,7 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-const upload = multer({
+const upload: Multer = multer({
     storage: multerS3({
         s3: s3,
         bucket: process.env.S3_BUCKET || 'sys-ut-news-space',

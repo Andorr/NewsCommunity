@@ -1,24 +1,26 @@
+// @flow 
 const mongoose = require("mongoose");
+import type { $Request, $Response } from 'express';
 
 const News = require('../models/news');
 const User = require('../models/user');
 const wss = require('../helpers/ws');
 
-const categories = require('../_data/data').categories;
+const categories: Array<string> = require('../_data/data').categories;
 
 // ----- NEWS -------
 
 // Fetch all news
-exports.news_get_all = (req, res) => {
+exports.news_get_all = (req: $Request, res: $Response) => {
 
     // Create query
-    let query = {};
+    let query: Object = {};
     
     // If user parameter is provided...
-    const user = req.query.user;
+    const user: ?string = req.query.user;
     if(user) {
         // Check if provided user is authenticated
-        const userId = req.userData && req.userData.userId? req.userData.userId.toString() : '';
+        const userId: string = req.userData && req.userData.userId? req.userData.userId.toString() : '';
         if(user !== userId) {
             res.status(403).json({message: 'Forbidden! Not valid user!'});
             return;
@@ -27,23 +29,23 @@ exports.news_get_all = (req, res) => {
     }
 
     // If category parameter is provided...
-    const category = req.query.category;
+    const category: ?string = req.query.category;
     if(category) {
         query['category'] = category;
     }
 
     // If importance parameter is provided
-    const importance = req.query.importance;
+    const importance: ?number = req.query.importance;
     if(typeof importance !== 'undefined') {
         query['importance'] = importance;
     }
 
     // Get all news, and unselect votes list
     News.find(query).sort('-created_at').limit(20).exec()
-    .then((news) => {
+    .then((news: News) => {
         // Checks if user has voted for any of the news items
-        const userId = (req.userData)? req.userData.userId : '';
-        const newsItems = news.map((value) => {
+        const userId: string = (req.userData)? req.userData.userId : '';
+        const newsItems: Array<Object> = news.map((value) => {
             const item = {...value._doc, isVoted: value.votes.findIndex((elem) => elem.user == userId) !== -1};
             delete item.votes; // Deletes the votes list
             return item;
@@ -57,12 +59,12 @@ exports.news_get_all = (req, res) => {
 };
 
 // Fetch a news-item based on id
-exports.news_get = (req, res) => {
+exports.news_get = (req: $Request, res: $Response) => {
     News.findOne({_id: req.params.id}).exec()
-    .then((news) => {
+    .then((news: News) => {
         if(news) {
-            const userId = req.userData ? req.userData.userId : null;
-            const item = {...news._doc, isVoted: news.votes.findIndex((elem) => elem.user == userId) !== -1};
+            const userId: ?string = req.userData ? req.userData.userId : null;
+            const item: Object = {...news._doc, isVoted: news.votes.findIndex((elem) => elem.user == userId) !== -1};
             delete item.votes; // Deletes the votes list
             res.json(item);
         } else {
@@ -76,7 +78,7 @@ exports.news_get = (req, res) => {
 };
 
 // Create a new news-item
-exports.news_create = async (req, res) => {
+exports.news_create = async (req: $Request, res: $Response) => {
 
     // Check if file was provided
     if(!req.file && !req.body.image_link) {
@@ -85,10 +87,10 @@ exports.news_create = async (req, res) => {
     }
 
     // Link to uploaded/given image
-    const imageLink = (req.file)? req.file.location : req.body.image_link;
+    const imageLink: string = (req.file)? req.file.location : req.body.image_link;
 
-    const userId = (req.userData? req.userData.userId : null);
-    let user = null;
+    const userId: ?string = (req.userData? req.userData.userId : null);
+    let user: ?User = null;
     if(userId) {
         await User.findById(userId)
         .then((result) => {
@@ -97,7 +99,7 @@ exports.news_create = async (req, res) => {
     }
 
     // Create new news
-    const news = new News({
+    const news: News = new News({
         id: new mongoose.Types.ObjectId(),
         image: imageLink,
         author: {
@@ -119,16 +121,16 @@ exports.news_create = async (req, res) => {
 };
 
 // Delete news, all users can delete news
-exports.news_delete = (req, res) => {
+exports.news_delete = (req: $Request, res: $Response) => {
 
-    News.findById(req.params.id, (err, news) => {
+    News.findById(req.params.id, (err: Error, news: News) => {
         if(err) {
             res.status(500).json({message: err});
         }
 
         // Check if user is the valid user (author)
-        const userId = req.userData && req.userData.userId ? req.userData.userId.toString() : null;
-        const authorId = news.author && news.author.user ? news.author.user.toString() : null;
+        const userId: ?string = req.userData && req.userData.userId ? req.userData.userId.toString() : null;
+        const authorId: ?string = news.author && news.author.user ? news.author.user.toString() : null;
         if(userId !== authorId && authorId) {
             res.status(403).json({message: 'Forbidden! Not valid user!'});
             return;
@@ -150,16 +152,16 @@ exports.news_delete = (req, res) => {
 };
 
 // Edit news, only passed in items should affect the news
-exports.news_put = (req, res) => {
+exports.news_put = (req: $Request, res: $Response) => {
     
     // Find News item
-    News.findOne({_id: req.params.id}, (err, news) => {
+    News.findOne({_id: req.params.id}, (err: Error, news: News) => {
         if(err) {
             res.status(404).json({error: err.message});
         } else {
             // Check if user is the valid user (author)
-            const userId = req.userData ? req.userData.userId.toString() : null;
-            const authorId = news.author ? news.author.user.toString() : null;
+            const userId: ?string = req.userData ? req.userData.userId.toString() : null;
+            const authorId: ?string = news.author ? news.author.user.toString() : null;
             if(userId !== authorId) {
                 res.status(403).json({message: 'Forbidden! Not valid user!'});
                 return;
@@ -187,8 +189,9 @@ exports.news_put = (req, res) => {
             if(req.body.subtitle !== undefined) {
                 news.subtitle = req.body.subtitle;
             }
+
             // Save
-            news.save((error, updatedNews) => {
+            news.save((error: Error, updatedNews: News) => {
                 if(error) {
                     res.status(400).send(error);
                 } else {
@@ -203,30 +206,30 @@ exports.news_put = (req, res) => {
 // ------- COMMENTS ------
 
 // Add comment to post
-exports.news_comment_create = (req, res) => {
+exports.news_comment_create = (req: $Request, res: $Response) => {
    
     // Find news item
-    News.findById(req.body.news, (err, news) => {
+    News.findById(req.body.news, (err: Error, news: News) => {
         if(err) {
             res.status(500).json({message: err.message});
         } else if(!news) {
             res.status(404).json({message: 'Can not find the given news item'});
         } else {
             // Create new comment
-            const comment = {
+            const comment: Object = {
                 comment: req.body.comment,
                 user: req.userData.userId,
                 user_nickname: req.userData.nickname,
             }
             news.comments.push(comment);
             
-            news.save((error, success) => {
+            news.save((error: Error, updatedNews: News) => {
                 if(err) {
                     res.status(500).json({message: error.message});
                 } else {
                     wss.send(news); // Send news-item through the webserver
 
-                    const newComment = news.comments[news.comments.length -1];
+                    const newComment: Object = news.comments[news.comments.length -1];
                     res.status(201).json(newComment);
                 }
             });
@@ -235,29 +238,29 @@ exports.news_comment_create = (req, res) => {
 };
 
 // Edit comment
-exports.news_comment_edit = (req, res) => {
+exports.news_comment_edit = (req: $Request, res: $Response) => {
 
-    News.findById(req.body.news, (err, news) => {
+    News.findById(req.body.news, (err: Error, news: News) => {
         if(err) {
             res.status(500).json({error: err.message});
         } else {
             // Find comment index
-            const commentId = req.params.id;
-            const index = news.comments.findIndex((elem) => elem.id == commentId);
+            const commentId: ?string = req.params.id;
+            const index: number = news.comments.findIndex((elem) => elem.id == commentId);
 
             // Check if user is the valid user (author)
-            const userId = req.userData ? req.userData.userId.toString() : null;
-            const authorId = index !== -1 ? news.comments[index].user.toString() : null;
+            const userId: ?string = req.userData ? req.userData.userId.toString() : null;
+            const authorId: ?string = index !== -1 ? news.comments[index].user.toString() : null;
             if(userId !== authorId) {
                 res.status(403).json({message: 'Forbidden! Not valid user!'});
                 return;
             }
 
             // Edit comment
-            if(index != -1) {
+            if(index !== -1) {
                 news.comments[index].comment = req.body.comment;
             }
-            news.save((error, success) => {
+            news.save((error: Error, updatedNews: News) => {
                 if(error) {
                     res.status(500).json({message: error.message});
                 } else {
@@ -270,29 +273,29 @@ exports.news_comment_edit = (req, res) => {
 }
 
 // Delete comment
-exports.news_comment_delete = (req, res) => {
+exports.news_comment_delete = (req: $Request, res: $Response) => {
 
-    News.findById(req.body.news, (err, news) => {
+    News.findById(req.body.news, (err: Error, news: News) => {
         if(err) {
             res.status(500).json({error: err.message});
         } else {
             // Find comment
-            const commentId = req.params.id;
-            const index = news.comments.findIndex((elem) => elem.id == commentId);
+            const commentId:string = req.params.id;
+            const index: number = news.comments.findIndex((elem) => elem.id == commentId);
 
             // Check if user is the valid user (author)
-            const userId = req.userData ? req.userData.userId.toString() : null;
-            const authorId = index !== -1 ? news.comments[index].user.toString() : null;
+            const userId: ?string = req.userData ? req.userData.userId.toString() : null;
+            const authorId: ?string = index !== -1 ? news.comments[index].user.toString() : null;
             if(userId !== authorId) {
                 res.status(403).json({message: 'Forbidden! Not valid user!'});
                 return;
             }
 
             // Delete comment
-            if(index != -1) {
+            if(index !== -1) {
                 news.comments.splice(index,1);
             }
-            news.save((error, success) => {
+            news.save((error: Error, updatedNews: News) => {
                 if(error) {
                     res.status(500).json({message: error.message});
                 } else {
@@ -308,25 +311,25 @@ exports.news_comment_delete = (req, res) => {
 // ------- VOTES ----------
 
 // Vote on a news item - create 
-exports.news_vote = (req, res) => {
+exports.news_vote = (req: $Request, res: $Response) => {
     // Find news item
-    News.findById(req.body.news, (err, news) => {
+    News.findById(req.body.news, (err: Error, news: News) => {
         if(err) {
             res.status(500).json({message: err.message});
         } else if(!news) {
             res.status(404).json({message: 'Can not find the given news item'});
         } else {
             // Check if it already exists
-            const index = news.votes.findIndex((elem) => elem.user == req.userData.userId);
+            const index: number = news.votes.findIndex((elem) => elem.user == req.userData.userId);
 
             // If vote is an upvote
             if(index === -1) {
-                const vote = {
+                const vote: Object = {
                     user: req.userData.userId,
                 };
                 news.votes.push(vote);
                 news.vote_count += 1;
-                news.save((error, success) => {
+                news.save((error: Error, updatedNews: News) => {
                     if(error) {
                         res.status(500).json({message: error.message});
                     } else {
@@ -338,7 +341,7 @@ exports.news_vote = (req, res) => {
                 // Delete item
                 news.votes.splice(index,1);
                 news.vote_count -= 1;
-                news.save((error, success) => {
+                news.save((error: News, updatedNews: News) => {
                     if(error) {
                         res.status(500).json({message: error.message});
                     } else {
@@ -352,6 +355,6 @@ exports.news_vote = (req, res) => {
 };
 
 // ---- CATEGORIES ----
-exports.news_categories = (req, res) => {
+exports.news_categories = (req: $Request, res: $Response) => {
     res.status(200).json({categories: categories});
 };

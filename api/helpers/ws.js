@@ -1,15 +1,19 @@
+// @flow 
 const WebSocket = require('ws');
+import type{Server} from 'http';
 
-const AUTH = 'auth';
-const MESSAGE = 'message';
+const AUTH: string = 'auth';
+const MESSAGE: string = 'message';
 
 class WS {
+
+    wss: WebSocket.Server;
 
     constructor() {
         this.wss = null;
     }
 
-    init(server) {
+    init(server: Server) {
         // Starting server
         this.wss = new WebSocket.Server({server});
         console.log("Websocket started");
@@ -18,11 +22,11 @@ class WS {
         });
 
         // On client connected
-        this.wss.on('connection', (ws) => {
+        this.wss.on('connection', (ws: WebSocket.Server) => {
             console.log('Client connected');
 
             ws.on('message', (messageData) => {
-                const msg = JSON.parse(messageData);
+                const msg: Object = JSON.parse(messageData);
             
                 // If message type is auth, save user id
                 if(msg && msg.type === AUTH) {
@@ -36,14 +40,11 @@ class WS {
                 }
 
             });
-            ws.on('disconnect', () => {
-                delete this.clients[ws.id];
-            })
         });
     }
 
     // Send message to all client
-    send(msg) {
+    send(msg: Object) {
 
         if(this.wss === null || !msg) {
             return;
@@ -60,7 +61,7 @@ class WS {
             }
             
             // Send message
-            const stringified = JSON.stringify(message);
+            const stringified: string = JSON.stringify(message);
             client.send(stringified);
         });
     }

@@ -1,22 +1,24 @@
+// @flow
 const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+import type { $Request, $Response } from 'express';
 
 const User = require('../models/user');
 
 // Create a new user
-exports.user_create = (req, res) => {
+exports.user_create = (req: $Request, res: $Response) => {
 
     // Check if user with given email is already registered
     User.find({email: req.body.email}).exec()
-    .then((user) => {
+    .then((user: User[]) => {
         // If user exists
         if(user.length >= 1) {
             return res.status(409).json({message: 'Given email is already taken'}); 
         } else {
 
             // Create salt and hash password
-            bcrypt.hash(req.body.password, 10, (err,hash) => {
+            bcrypt.hash(req.body.password, 10, (err: Error , hash: string) => {
                 if(err) {
                     // On error, return error
                     return res.status(500).json({
@@ -24,14 +26,14 @@ exports.user_create = (req, res) => {
                     });
                 } else {
                     // Create user with new hash and salt
-                    const user = new User({
+                    const user: User = new User({
                         email: req.body.email,
                         password: hash,
                         nickname: req.body.nickname,
                     });
-                    user.save().then((result) => {
+                    user.save().then((result: User) => {
                         res.status(201).json(result);
-                    }).catch((err) => {
+                    }).catch((err: any) => {
                         res.status(500).json({message: err.message})
                     });
                 }
@@ -41,7 +43,7 @@ exports.user_create = (req, res) => {
 };
 
 // Login
-exports.user_login = (req, res) => {
+exports.user_login = (req: $Request, res: $Response) => {
     // Check if user exists
     User.find({email: req.body.email}).select('+password').exec()
     .then((user) => {
@@ -52,19 +54,19 @@ exports.user_login = (req, res) => {
         }
         
         // Hash input password and compare with hash
-        bcrypt.compare(req.body.password, user[0].password, (err, result) => {
+        bcrypt.compare(req.body.password, user[0].password, (err: Error, status: bool) => {
             if(err) {
                 return res.status(401).json({
                     message: 'Authorization failed',
                 });
             }
-            if(result) {
+            if(status) {
                 // Generate JWT
-                const token = jwt.sign({
+                const token: string = jwt.sign({
                     email: user[0].email,
                     userId: user[0]._id,
                     nickname: user[0].nickname,
-                }, process.env.JWT_KEY, {
+                }, process.env.JWT_KEY || '', {
                     expiresIn: '1h',
                 });
 
@@ -74,13 +76,13 @@ exports.user_login = (req, res) => {
             }
         });
     })
-    .catch((error) => {
+    .catch((error: any) => {
         res.status(500).json({message: error.message})
     });
 };
 
 // Delete user with given id
-exports.user_delete = (req, res, next) => {
+exports.user_delete = (req: $Request, res: $Response) => {
     // Check if authorized user is the user to be deleted
     if(req.params.userId !== req.userData.userId) {
         return res.status(401).json({
@@ -89,24 +91,24 @@ exports.user_delete = (req, res, next) => {
     }
 
     User.deleteOne({_id: req.params.userId}).exec()
-    .then((result) => {
+    .then((result: any) => {
         res.status(200).json({message: 'user deleted'});
     })
-    .catch((error) => res.status(500).json({message: error.message}))
+    .catch((error: any) => res.status(500).json({message: error.message}))
 };
 
 // Get user information
-exports.user_get = (req, res) => {
+exports.user_get = (req: $Request, res: $Response) => {
     
     // Get User
-    User.findById(req.userData.userId, (err, user) => {
+    User.findById(req.userData.userId, (err: Error, user: User) => {
         if(err) {
             res.status(403).json({message: err.message});
         } else {
             res.status(200).json(user);
         }
     })
-    .catch((error) => {
+    .catch((error: any) => {
         res.status(500).json({message: error.message})
     });
 

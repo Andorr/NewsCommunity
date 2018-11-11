@@ -1,3 +1,4 @@
+// @flow 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 exports.CommentSchema = new Schema({

@@ -23,10 +23,6 @@
   "homepage": "https://github.com/Andorr/NewsCommunity#readme",
   "dependencies": {
     "aws-sdk": "^2.348.0",
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-flow": "^6.23.0",
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.1.0",
@@ -34,7 +30,7 @@
     "jest": "^23.6.0",
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.2.12",
-    "morgan": "^1.9.0",
+    "morgan": "^1.9.1",
     "multer": "^1.3.1",
     "multer-s3": "^2.9.0",
     "ws": "^6.0.0"
@@ -45,6 +41,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-flow": "^6.23.0",
     "flow-bin": "^0.83.0",
+    "flow-typed": "^2.5.1",
     "node-mocks-http": "^1.7.3",
     "nodemon": "^1.18.4"
   }

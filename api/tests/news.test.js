@@ -1,33 +1,35 @@
+// @flow 
 const mongoose = require('mongoose');
 const News = require('../models/news');
 const User = require('../models/user');
 const controller = require('../controllers/news');
 const http_mocks = require('node-mocks-http');
+import type {MockResponse, MockRequest} from 'node-mocks-http';
 const {EventEmitter} = require('events');
 require('dotenv').config();
 
 // Test Data
-const sampleData = require('./newsTestData');
-const testData = sampleData.data;
-const user = sampleData.user;
-let newsId = null;
+const sampleData: Object = require('./newsTestData');
+const testData: Object = sampleData.data;
+const user: Object= sampleData.user;
+let newsId: ?string = null;
 
 const db = mongoose.connect(
-    process.env.MONGODB_TEST_DATABASE_URL, 
+    process.env.MONGODB_TEST_DATABASE_URL || '', 
     {useNewUrlParser: true}
 );
 
 // requests and reponses
-const buildResponse = () => (http_mocks.createResponse({eventEmitter: EventEmitter}));
-const getAllNewsReq = ({method: 'GET', url: 'news/'});
-const getNewsItemReq = (id, userId) => ({method: 'GET', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
-const createNewsRequest = (data) => ({method: 'POST', url: 'news/', body: {...data}, file: {fileName: data.image}});
-const deleteNewsItemReq = (id, userId) => ({method: 'DELETE', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
-const updateNewsItemReq = (id, body, userId) => ({method: 'PUT', url: 'news/:id', params: {id: id}, body: body, userData: {userId: userId}});
-const createCommentRequest = (id, comment) => ({method: 'POST', url: 'news/comment/', body: {news: id, comment: comment}, userData: {userId: '1234', nickname: 'asdf'}});
-const updateCommentRequest = (newsId, commentId, comment, userId) => ({method: 'PUT', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId, comment: comment}, userData: {userId: userId, nickname: 'asdf'}});
-const deleteCommentRequest = (newsId, commentId, userId) => ({method: 'DELETE', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId}, userData: {userId: userId, nickname: 'asdf'}});
-const voteNewsItemReq = (newsId, upvote, userId) => ({method: 'POST', url: 'news/vote/', body: {news: newsId, upvote: upvote}, userData: {userId: userId, nickname: 'asdf'}});
+const buildResponse: Function = () => (http_mocks.createResponse({eventEmitter: EventEmitter}));
+const getAllNewsReq: Object = ({method: 'GET', url: 'news/'});
+const getNewsItemReq: Function = (id: string, userId: string) => ({method: 'GET', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
+const createNewsRequest: Function = (data: Object) => ({method: 'POST', url: 'news/', body: {...data}, file: {fileName: data.image}});
+const deleteNewsItemReq: Function = (id: string, userId: string) => ({method: 'DELETE', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
+const updateNewsItemReq: Function = (id: string, body: Object, userId: string) => ({method: 'PUT', url: 'news/:id', params: {id: id}, body: body, userData: {userId: userId}});
+const createCommentRequest: Function = (id: string, comment: string) => ({method: 'POST', url: 'news/comment/', body: {news: id, comment: comment}, userData: {userId: '1234', nickname: 'asdf'}});
+const updateCommentRequest: Function = (newsId: string, commentId: string, comment: string, userId: string) => ({method: 'PUT', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId, comment: comment}, userData: {userId: userId, nickname: 'asdf'}});
+const deleteCommentRequest: Function = (newsId, commentId, userId) => ({method: 'DELETE', url: 'news/comment/:id', params: {id: commentId}, body: {news: newsId}, userData: {userId: userId, nickname: 'asdf'}});
+const voteNewsItemReq: Function = (newsId: string, upvote: string, userId: string) => ({method: 'POST', url: 'news/vote/', body: {news: newsId, upvote: upvote}, userData: {userId: userId, nickname: 'asdf'}});
 
 // Tell mongodb to use javascript Promises
 mongoose.Promise = global.Promise;
@@ -36,27 +38,27 @@ describe('Testing user controller', () => {
     beforeAll((done) => {
         // Drop data
        
-        News.deleteMany({}, async (err) => {
-            let count = 0;
+        News.deleteMany({}, async (err: Error) => {
+            let count: number = 0;
 
             // Delete users
             await User.deleteOne({email: user.email});
 
             // Create user
-            const newUser = new User({
+            const newUser: User = new User({
                 email: user.email,
                 password: user.password,
                 nickname: user.nickname,
             });
 
-            let resultUser = null;
-            await newUser.save().then((result) => {
+            let resultUser: User = null;
+            await newUser.save().then((result: User) => {
                 user.id = result._id;
                 sampleData.extra.author.id = user.id;   
                 resultUser = result;
             });
 
-            testData.forEach(async (n) => {
+            testData.forEach(async (n: Object) => {
                 const news = new News({
                     id: new mongoose.Types.ObjectId(),
                     image: n.image,
@@ -69,7 +71,7 @@ describe('Testing user controller', () => {
                 });
                 
                 // Create new data
-                await news.save().then((newsItem) => {
+                await news.save().then((newsItem: News) => {
                     testData[count].id = newsItem._id;
                     count++;
                     newsId = newsItem._id;
@@ -89,7 +91,7 @@ describe('Testing user controller', () => {
         User.deleteOne({email: user.email})
         .then(() => {
             News.deleteMany({})
-            .then((err) => {
+            .then((err: Error) => {
                 // Disconnect
                 const { connections } = mongoose;
                 for (const con of connections) {
@@ -102,13 +104,13 @@ describe('Testing user controller', () => {
      
     // GET ALL - SORT
     test('Tests sort', (done) => {
-        News.find({}, (err, news) => {
+        News.find({}, (err: Error, news: News[]) => {
             // Check data
             expect(news.length).toBe(testData.length);
 
             // Create request
-            const response = buildResponse();
-            const request = http_mocks.createRequest(getAllNewsReq);
+            const response: MockResponse = buildResponse();
+            const request: MockRequest = http_mocks.createRequest(getAllNewsReq);
             response.on('end', () => {
                 // Check data length and if sorted
                 const data = JSON.parse(response._getData());
@@ -125,8 +127,8 @@ describe('Testing user controller', () => {
     test('Test get specific item', (done) => {
         News.findOne({}, (err, news) => {
             // Create request
-            const response = buildResponse();
-            const request = http_mocks.createRequest(getNewsItemReq(news.id));
+            const response: MockResponse = buildResponse();
+            const request: MockRequest = http_mocks.createRequest(getNewsItemReq(news.id));
             response.on('end', () => {
                 // Check if response data is identical to the given news-data
                 const data = JSON.parse(response._getData());
@@ -145,12 +147,12 @@ describe('Testing user controller', () => {
 
     // CREATE
     test('Create news item', (done) => {
-        const item = sampleData.extra;
+        const item: Object = sampleData.extra;
         item.author.user = user.id;
         
         // Create request
-        const response = buildResponse();
-        const request = http_mocks.createRequest(createNewsRequest(item, user.id));
+        const response: MockResponse = buildResponse();
+        const request: MockRequest = http_mocks.createRequest(createNewsRequest(item));
         response.on('end', () => {
             const status = response.statusCode;
             const data = JSON.parse(response._getData());
@@ -161,7 +163,7 @@ describe('Testing user controller', () => {
             expect(data.author.email).toBe(item.author.email);
             expect(data.author.nickname).toBe(item.author.nickname);
 
-            News.find({}, (err, news) => {
+            News.find({}, (err: Error, news: News[]) => {
                 expect(news.length).toBe(3);
                 done();
             });
@@ -173,8 +175,8 @@ describe('Testing user controller', () => {
 
     // DELETE
     test('Delete news item', (done) => {
-        const item = sampleData.extra;
-        const news = new News({
+        const item: Object = sampleData.extra;
+        const news: News = new News({
             id: new mongoose.Types.ObjectId(),
             ...item,
             author: {
@@ -182,16 +184,16 @@ describe('Testing user controller', () => {
                 email: user.email,
                 nickname: user.nickname,
             },
-        }).save().then((newsItem) => {
+        }).save().then((newsItem: News) => {
             // Create request
-            const response = buildResponse();
-            const request = http_mocks.createRequest(deleteNewsItemReq(newsItem._id, user.id));
+            const response: MockResponse = buildResponse();
+            const request: MockRequest = http_mocks.createRequest(deleteNewsItemReq(newsItem._id, user.id));
             response.on('end', () => {
-                const status = response.statusCode;
-                const data = JSON.parse(response._getData());
+                const status: number = response.statusCode;
+                const data: Object = JSON.parse(response._getData());
                 expect(status).toBe(200);
                 
-                News.find({_id: newsItem._id}, (err, news) => {
+                News.find({_id: newsItem._id}, (err: Error, news: News[]) => {
                     expect(news.length).toBe(0);
                     done();
                 });
@@ -203,24 +205,24 @@ describe('Testing user controller', () => {
     });
 
     // UPDATE
-    test('Update news item', (done) => {
-        const item = testData[0];
-        const body = {
+    test('Update news item', (done: Function) => {
+        const item: Object = testData[0];
+        const body: Object = {
             title: 'This is a new title',
             content: 'This is new content',
             category: 'sport',
         };
         
         // Create request
-        const response = buildResponse();
-        const request = http_mocks.createRequest(updateNewsItemReq(item.id, body, user.id));
+        const response: MockResponse = buildResponse();
+        const request: MockRequest = http_mocks.createRequest(updateNewsItemReq(item.id, body, user.id));
         response.on('end', () => {
             // Check response status
-            const status = response.statusCode;
+            const status: number = response.statusCode;
             expect(status).toBe(200);
             
             // Find the same item and compare values
-            News.findById(item.id, (err, news) => {
+            News.findById(item.id, (err: Error, news: News) => {
                 // Changed values
                 expect(news).toBeDefined();
                 expect(news.title).toBe(body.title);
@@ -240,16 +242,16 @@ describe('Testing user controller', () => {
     });
 
     // CREATE COMMENT
-    test('Create comment', (done) => {
-        const item = testData[0];
-        const comment = 'My awesome comment!';
+    test('Create comment', (done: Function) => {
+        const item: Object = testData[0];
+        const comment: string = 'My awesome comment!';
         
         // Create request
-        const response = buildResponse();
-        const request = http_mocks.createRequest(createCommentRequest(item.id, comment));
+        const response: MockResponse = buildResponse();
+        const request: MockRequest = http_mocks.createRequest(createCommentRequest(item.id, comment));
         response.on('end', () => {
-            const status = response.statusCode;
-            const data = JSON.parse(response._getData());
+            const status: number = response.statusCode;
+            const data: Object = JSON.parse(response._getData());
             
             // Check status code and if comment was added
             expect(status).toBe(201);
@@ -261,17 +263,17 @@ describe('Testing user controller', () => {
     });
 
     // UPDATE COMMENT
-    test('Test edit comment', (done) => {
-        const item = testData[1];
-        const comment = {
+    test('Test edit comment', (done: Function) => {
+        const item: Object = testData[1];
+        const comment: Object = {
             comment: 'MY NEW COMMENT',
             user: user.id,
             user_nickname: user.nickname,
         };
-        const newComment = 'I need help!';
+        const newComment: string = 'I need help!';
 
         // Find news item and create comment
-        News.findById(item.id, (err, newsItem) => {
+        News.findById(item.id, (err: Error, newsItem: Object) => {
             expect(err).toBeNull();
 
             // Create comment
@@ -280,17 +282,17 @@ describe('Testing user controller', () => {
                 expect(news).toBeDefined();
 
                 // Update comment
-                const response = buildResponse();
-                const request = http_mocks.createRequest(updateCommentRequest(item.id, news.comments[0].id, newComment, user.id));
+                const response: MockResponse = buildResponse();
+                const request: MockRequest = http_mocks.createRequest(updateCommentRequest(item.id, news.comments[0].id, newComment, user.id));
                 response.on('end', () => {
-                    const status = response.statusCode;
-                    const data = JSON.parse(response._getData());
+                    const status: number = response.statusCode;
+                    const data: Object = JSON.parse(response._getData());
                     
                     // Check status code
                     expect(status).toBe(200);
                     
                     // Check if comment was changed
-                    News.findById(item.id, (err, updatedNews) => {
+                    News.findById(item.id, (err: Error, updatedNews: News) => {
                         expect(updatedNews.comments.length).toBe(1);
                         expect(updatedNews.comments[0].comment).toBe(newComment);
                         done();
@@ -303,16 +305,16 @@ describe('Testing user controller', () => {
     });
 
     // DELETE COMMENT
-    test('Test delete comment', (done) => {
-        const item = testData[1];
-        const comment = {
+    test('Test delete comment', (done: Function) => {
+        const item: Object = testData[1];
+        const comment: Object = {
             comment: 'MY NEW COMMENT',
             user: user.id,
             user_nickname: user.nickname,
         };
 
         // Create comment to delete
-        News.findById(item.id, (err, newsItem) => {
+        News.findById(item.id, (err: Error, newsItem: News) => {
             expect(err).toBeNull();
 
             newsItem.comments.push(comment);
@@ -320,18 +322,18 @@ describe('Testing user controller', () => {
                 expect(news).toBeDefined();
 
                 // Delete comment
-                const commentID = news.comments[0]._id;
-                const response = buildResponse();
-                const request = http_mocks.createRequest(deleteCommentRequest(item.id, commentID, user.id));
+                const commentID: string = news.comments[0]._id;
+                const response: MockResponse = buildResponse();
+                const request: MockRequest = http_mocks.createRequest(deleteCommentRequest(item.id, commentID, user.id));
                 response.on('end', () => {
-                    const status = response.statusCode;
-                    const data = JSON.parse(response._getData());
+                    const status: number = response.statusCode;
+                    const data: Object = JSON.parse(response._getData());
 
                     // Check status code
                     expect(status).toBe(200);
                     
                     // Check if comment was changed
-                    News.findById(item.id, (err, updatedNews) => {
+                    News.findById(item.id, (err: Error, updatedNews: News) => {
                         expect(updatedNews.comments.findIndex(e => e._id === commentID)).toBe(-1);
                         done();
                     });
@@ -343,19 +345,19 @@ describe('Testing user controller', () => {
     });
 
     // Vote
-    test('Test upvote news', (done) => {
+    test('Test upvote news', (done: Function) => {
         const item = testData[0];
 
         // Create requests
-        const response = buildResponse();
-        const request = http_mocks.createRequest(voteNewsItemReq(item.id, true, user.id));
+        const response: MockResponse = buildResponse();
+        const request: MockRequest = http_mocks.createRequest(voteNewsItemReq(item.id, true, user.id));
 
         response.on('end', () => {
-            const status = response.statusCode;
+            const status: number = response.statusCode;
             expect(status).toBe(201);
 
             // Check if vote was added
-            News.findById(item.id, (err, news) => {
+            News.findById(item.id, (err: Error, news: News) => {
                 expect(news).toBeDefined();
                 expect(news._id).toEqual(item.id);
                 expect(news.vote_count).toBe(1);
@@ -370,7 +372,7 @@ describe('Testing user controller', () => {
 });
 
 // --- HELPER METHODS ---
-const isSorted = (arr) => {
+const isSorted: Function = (arr: Array<News>): bool => {
     for(let i = 0; i < arr.length-1; i++) {
         if(arr[i].created_at < arr[i + 1].created_at) {
             return false;

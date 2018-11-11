@@ -1,38 +1,41 @@
+// @flow
 const mongoose = require('mongoose');
 const User = require('../models/user');
 const controller = require('../controllers/user');
 const http_mocks = require('node-mocks-http');
+import type {MockResponse, MockRequest} from 'node-mocks-http';
 require('dotenv').config();
 
+const DATABASE_URL: string = process.env.MONGODB_TEST_DATABASE_URL || '';
 const db = mongoose.connect(
-    process.env.MONGODB_TEST_DATABASE_URL, 
+    DATABASE_URL, 
     {useNewUrlParser: true}
 );
 
-const email = 'andershallemiversen@hotmail.com';
-const password = '1234abcd';
-const nickname = 'andorr';
-let accountId = null;
+const email: string = 'andershallemiversen@hotmail.com';
+const password: string = '1234abcd';
+const nickname: string = 'andorr';
+let accountId: ?string = null;
 
 // requests and reponses
-const buildResponse = () => (http_mocks.createResponse({eventEmitter: require('events').EventEmitter}));
-const createUserRequest = {method: 'POST', url: 'account/signup', body: {email: email, password: password, nickname: nickname}};
-const loginRequest = {method: 'POST', url: 'account/login', body: {email: email, password: password}};
-const deleteRequest = (userId) => ({method: 'DELETE', url: 'account/', params: {userId: userId}, userData: {userId: userId}});
-const getUserRequest = (id) => ({method: 'GET', url: 'account/', userData: {userId: id}});
+const buildResponse: Function = () => (http_mocks.createResponse({eventEmitter: require('events').EventEmitter}));
+const createUserRequest: Object = {method: 'POST', url: 'account/signup', body: {email: email, password: password, nickname: nickname}};
+const loginRequest: Object = {method: 'POST', url: 'account/login', body: {email: email, password: password}};
+const deleteRequest: Function = (userId: string) => ({method: 'DELETE', url: 'account/', params: {userId: userId}, userData: {userId: userId}});
+const getUserRequest: Function = (id: string) => ({method: 'GET', url: 'account/', userData: {userId: id}});
 
 // Tell mongodb to use javascript Promises
 mongoose.Promise = global.Promise;
 
 describe('Testing user controller', () => {
-    beforeAll((done) => {
+    beforeAll((done: Function) => {
         // Drop data
-        User.deleteMany({}, (err) => {
+        User.deleteMany({}, (err: Error) => {
             done();
         });
     });
      
-    afterAll((done) => {
+    afterAll((done: Function) => {
         // Disconnect
         const { connections } = mongoose;
         for (const con of connections) {
@@ -41,14 +44,14 @@ describe('Testing user controller', () => {
         return mongoose.disconnect();
     });
      
-    test('Create user', (done) => {
+    test('Create user', (done: Function) => {
         // Create requests and response
-        const response = buildResponse();
-        const request = http_mocks.createRequest(createUserRequest);
+        const response: MockResponse = buildResponse();
+        const request: MockRequest = http_mocks.createRequest(createUserRequest);
         response.on('end', () => {
             expect(response.statusCode).toBe(201);
             // Check if user was created
-            User.findOne({email: email}, (err, user) => {
+            User.findOne({email: email}, (err: Error, user: User) => {
                 expect(user.email === email).toBeTruthy();
                 expect(user.nickname === nickname).toBeTruthy();
                 accountId = user._id;
@@ -61,10 +64,10 @@ describe('Testing user controller', () => {
     });
 
 
-    test('Test login', (done) => {
+    test('Test login', (done: Function) => {
         // Create requests and response
-        const response = buildResponse();
-        const request = http_mocks.createRequest(loginRequest);
+        const response: MockResponse = buildResponse();
+        const request: MockRequest = http_mocks.createRequest(loginRequest);
         response.on('end', () => {
 
             // Check if token was received
@@ -78,15 +81,15 @@ describe('Testing user controller', () => {
         controller.user_login(request, response);
     });
 
-    test('Get user info', (done) => {
+    test('Get user info', (done: Function) => {
         // Get user id
-        User.findOne({}, (err, user) => {
+        User.findOne({}, (err: Error, user: User) => {
             expect(err).toBeNull();
-            const userId = user._id; // UserId
+            const userId: string = user._id; // UserId
 
             // Mock request and response
-            const response = buildResponse();
-            const request = http_mocks.createRequest(getUserRequest(userId));
+            const response: MockResponse = buildResponse();
+            const request: MockRequest = http_mocks.createRequest(getUserRequest(userId));
             response.on('end', () => {
                 expect(response.statusCode).toBe(200);
                 const data = JSON.parse(response._getData());
@@ -107,17 +110,17 @@ describe('Testing user controller', () => {
                 console.log(err);
             }
             expect(err).toBeNull();
-            const userId = user._id; // UserId
+            const userId: string = user._id; // UserId
 
             // Mock request and response
-            const response = buildResponse();
-            const request = http_mocks.createRequest(deleteRequest(userId));
+            const response: MockResponse = buildResponse();
+            const request: MockRequest = http_mocks.createRequest(deleteRequest(userId));
             response.on('end', () => {
                 expect(response.statusCode).toBe(200);
 
                 // Check if user was deleted
-                User.findById(userId, (err, users) => {
-                    expect(users).toBeNull();
+                User.findById(userId, (err: Error, foundUser: User) => {
+                    expect(foundUser).toBeNull();
                     done();
                 });
             });

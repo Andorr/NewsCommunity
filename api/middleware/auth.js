@@ -1,9 +1,12 @@
+// @flow
 const jwt = require('jsonwebtoken');
+import type { $Request, $Response } from 'express';
 
-exports.checkAuth = (req, res, next) => {
+exports.checkAuth = (req: $Request, res: $Response, next: Function) => {
     try {
-        const token = req.headers.authorization.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_KEY);
+        const token: string = req.headers.authorization.split(" ")[1];
+        const key: any = process.env.JWT_KEY;
+        const decoded: Object = jwt.verify(token, key);
         req.userData = decoded;
         next();
     } catch(error) {
@@ -13,13 +16,14 @@ exports.checkAuth = (req, res, next) => {
     }
 };
 
-exports.withAuth = (req, res, next) => {
+exports.withAuth = (req: $Request, res: $Response, next: Function) => {
     try {
-        const token = req.headers.authorization.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_KEY);
+        const token: string = req.headers.authorization.split(" ")[1];
+        const key: any = process.env.JWT_KEY;
+        const decoded: Object = jwt.verify(token, key);
         req.userData = decoded;
     } catch(error) {
-        
+        console.log("[WithAuth] ERROR: " + error);
     }
     next();
 };

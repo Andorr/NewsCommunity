@@ -1,3 +1,4 @@
+// @flow
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -7,7 +8,7 @@ const VoteSchema = require('./vote').VoteSchema;
 const UserSchema = require('./user').schema;
 
 // Category
-const categories = require('../_data/data').categories;
+const categories: Array<string> = require('../_data/data').categories;
 
 const newsModel = new Schema({
     title: {type: String, required: true},

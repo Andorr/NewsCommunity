@@ -1,4 +1,5 @@
 const express = require('express');
+import type{Express, $Request, $Response} from 'express';
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
@@ -13,7 +14,7 @@ const db = mongoose.connect(
 // Tell mongodb to use javascript Promises
 mongoose.Promise = global.Promise;
 
-const app = express();
+const app: Express = express();
 
 // Logging
 app.use(morgan('dev'));
@@ -26,7 +27,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // application/x-www-form-ur
 app.use(bodyParser.json()); // Parse json
 
 // Cors headers
-app.use((req, res, next) => {
+app.use((req: $Request, res: $Response, next: Function) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header(
         "Access-Control-Allow-Headers",
@@ -43,14 +44,14 @@ app.use((req, res, next) => {
 app.use(require('./api/routes'))
 
 // 404 Not Found
-app.use((req, res, next) => {
+app.use((req: $Request, res: $Response, next: Function) => {
     const error = new Error('Not found');
     error.status = 404;
     next(error);
 });
 
 // Universal error handler
-app.use((error, req, res, next) => {
+app.use((error: Error, req: $Request, res: $Response, next: Function) => {
     res.status(error.status || 500);
     res.json({
         error: {
