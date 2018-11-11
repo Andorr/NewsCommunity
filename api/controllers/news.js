@@ -109,12 +109,12 @@ exports.news_create = async (req: $Request, res: $Response) => {
         },
         ...req.body,
     });
-    news.save().then((result) => {
+    news.save().then((result: News) => {
         wss.send(result); // Send news-item through the webserver
         res.status(201);
         res.json(result);
     })
-    .catch((error) => {
+    .catch((error: any) => {
         res.status(500);
         res.json({message: error.message});
     });

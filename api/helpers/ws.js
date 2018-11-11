@@ -4,6 +4,11 @@ import type{Server} from 'http';
 
 const AUTH: string = 'auth';
 const MESSAGE: string = 'message';
+const PING: string = 'ping';
+
+function heartbeat(): void {
+    this.isAlive = true;
+}
 
 class WS {
 
@@ -24,23 +29,44 @@ class WS {
         // On client connected
         this.wss.on('connection', (ws: WebSocket.Server) => {
             console.log('Client connected');
-
+            ws.isAlive = true;
             ws.on('message', (messageData) => {
                 const msg: Object = JSON.parse(messageData);
             
+                // If message was an ping
+                if(msg && msg.type === PING) {
+                    ws.isAlive = true;
+                    ws.send(PING);
+                    console.log("PING RECIEVED");
+                }
                 // If message type is auth, save user id
-                if(msg && msg.type === AUTH) {
+                else if(msg && msg.type === AUTH) {
                     ws.id = msg.userId;
-                } 
+                }
                 // If message type is message, send to all clients
                 else if(msg && msg.type === MESSAGE) {
                     this.wss.clients.forEach((client) => {
                         client.send(JSON.stringify(msg));
                     });
                 }
-
+                ws.isAlive = true;
             });
+
+            // On pong message recieved, keep socket alive
         });
+
+        // Terminate connections if not alive
+        const interval: IntervalID = setInterval(() => {
+            this.wss.clients.forEach((client: WebSocket.Server) => {
+                console.log("Is client alive? " + client.isAlive);
+                if(client.isAlive === false) {
+                    console.log("DISCONNECTED CLIENT");
+                    return client.terminate()
+                };
+                client.isAlive = false;
+                
+            });
+        }, 30000);
     }
 
     // Send message to all client
