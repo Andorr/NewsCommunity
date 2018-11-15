@@ -259,7 +259,7 @@ exports.news_comment_edit = (req: $Request, res: $Response) => {
             // Edit comment
             if(index !== -1) {
                 news.comments[index].comment = req.body.comment;
-                news.updated_at = Date.now();
+                news.comments[index].updated_at = Date.now();
             }
             news.save((error: Error, updatedNews: News) => {
                 if(error) {
