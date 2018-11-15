@@ -6,4 +6,5 @@ exports.CommentSchema = new Schema({
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
     user_nickname: {type: String, default: 'Unknown'},
     created_at: {type: Date, default: Date.now},
+    updated_at: {type: Date, default: null, required: false},
 });
