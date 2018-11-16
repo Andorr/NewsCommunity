@@ -13,6 +13,7 @@ const userModel = new Schema({
     },
     password: {type: String, required: true, select: false},
     nickname: {type: String},
+    image: {type: String, default: null, required: false},
 });
 
 module.exports = mongoose.model('user', userModel);

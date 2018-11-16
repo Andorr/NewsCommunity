@@ -85,8 +85,8 @@ exports.user_login = (req: $Request, res: $Response) => {
 exports.user_delete = (req: $Request, res: $Response) => {
     // Check if authorized user is the user to be deleted
     if(req.params.userId !== req.userData.userId) {
-        return res.status(401).json({
-            message: 'Authorization failed'
+        return res.status(404).json({
+            message: 'Action is forbidden for this user'
         });
     }
 
@@ -103,7 +103,7 @@ exports.user_get = (req: $Request, res: $Response) => {
     // Get User
     User.findById(req.userData.userId, (err: Error, user: User) => {
         if(err) {
-            res.status(403).json({message: err.message});
+            res.status(404).json({message: err.message});
         } else {
             res.status(200).json(user);
         }
@@ -112,4 +112,26 @@ exports.user_get = (req: $Request, res: $Response) => {
         res.status(500).json({message: error.message})
     });
 
+}
+
+// Change profile image
+exports.user_set_image = (req: $Request, res: $Response) => {
+
+    // Get user
+    User.findById(req.userData.userId, (err: Error, user: User) => {
+        if(err) {
+            res.status(404).json({message: err.message});
+        } else {
+             // Link to uploaded/given image
+            const image: ?string = (req.file)? req.file.location : null;
+            user.image = image;
+            
+            // Save user
+            user.save().then((result: User) => {
+                res.status(200).json(result);
+            }).catch((err: any) => {
+                res.status(500).json({message: err.message})
+            });
+        }
+    });
 }
