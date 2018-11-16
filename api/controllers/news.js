@@ -106,6 +106,7 @@ exports.news_create = async (req: $Request, res: $Response) => {
             user: user ? user.id : null,
             email: user ? user.email : null,
             nickname: user ? user.nickname : null,
+            image: user ? user.image : null,
         },
         ...req.body,
     });
