@@ -31,6 +31,7 @@ const newsModel = new Schema({
         user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
         email: {type: String, required: false},
         nickname: {type: String, required: false},
+        image: {type: string, required: false},
     },
 });
 module.exports = mongoose.model('news', newsModel);
