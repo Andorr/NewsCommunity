@@ -75,7 +75,7 @@ Gets all latests news with a limit of 20.
   * importance: Gives news-posts with the given importance. It is a number [1-2].
   * user: Gives the news-posts posted by a given user. Needs to be authenticated to access this option.
 
-* __/news__ POST**
+* __/news__ **POST**
 Creates a new news-post. REQUIRES AUTH!
   ##### Requires following parameters in body:
   * title: string
@@ -101,7 +101,7 @@ Updates a given newspost. REQUIRES AUTH!
 
 * __/news/comment__ **POST**
 Creates a comment to a given post. REQUIRES AUTH!
-  ###### Requires following parameters in body:
+  ##### Requires following parameters in body:
   * news: NEWS_ID
   * comment: string
 
@@ -126,7 +126,7 @@ Gets all the categories in form of an array
 
 * __/account/signup__ **POST**
 Creates a new user.
-  ###### Following parameters in body is required:
+  ##### Following parameters in body is required:
   * email: string
   * password: string
   * nickname: string
