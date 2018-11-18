@@ -4,13 +4,13 @@ the basic implementation of the MVC concept with News-posts, comments, upvoting 
 
 It uses MongoDB as database and mongoose to communicate
 
-### Contents
+## Contents
 [Installation](#installation)  
-[Usage](#Usage)
+[Endpoints](#Endpoints)
 
-### Installation
+## Installation
 
-#### Getting Started
+### Getting Started
 
 ```
 git clone git@github.com:Andorr/NewsCommunity.git
@@ -19,9 +19,9 @@ npm install
 npm start
 ```
 
-#### Custom configuration
+### Custom configuration
 
-##### Database
+#### Database
 To configure your own MongoDB with this project you have to change the __.env__ file.
 
 ```
@@ -29,7 +29,7 @@ MONGODB_DATABASE_URL=YOUR_DATABASE_URL_HERE
 MONGODB_TEST_DATABASE_URL=YOUR_TEST_DATABASE_URL_HERE
 ```
 
-##### Image upload
+#### Image upload
 The API has a solution for handling uploading of images to a server. By default this is a
 S3 hosted by [DigitalOcean](https://www.digitalocean.com/), and Digital Ocean required AWS keys.
 To get this to work you have to define your own Digital Ocean S3 Space with AWS-keys.
@@ -45,4 +45,4 @@ AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_ACCESS_KEY
 ```
 
 
-### Usage
+### Endpoints
