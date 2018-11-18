@@ -62,7 +62,7 @@ Gets all latests news with a limit of 20.
 
 * __/news__ **POST**
 Creates a new news-post. REQUIRES AUTH!
-##### Requires following parameters in body:
+  ##### Requires following parameters in body:
   * title: string
   * subtitle: string
   * image: File
@@ -86,7 +86,7 @@ Updates a given newspost. REQUIRES AUTH!
 
 * __/news/comment **POST**
 Creates a comment to a given post. REQUIRES AUTH!
-###### Requires following parameters in body:
+  ###### Requires following parameters in body:
   * news: NEWS_ID
   * comment: string
 
@@ -111,14 +111,14 @@ Gets all the categories in form of an array
 
 * __/account/signup **POST**
 Creates a new user.
-###### Following parameters in body is required:
+  ###### Following parameters in body is required:
   * email: string
   * password: string
   * nickname: string
   
 * __/account/login **POST**
 Returns a token.
-##### Following parameters in required in body
+  ##### Following parameters in required in body
   * email: string
   * password: string
   
@@ -127,7 +127,7 @@ Deletes an user. REQUIRES AUTH
 
 * __/account/avatar  **POST**
 Changes the user's profile image (avatar). REQURES AUTH!
-##### Following parameters in required in body
+  ##### Following parameters in required in body
   * image: FILE
 
 * __/account/ **GET**
