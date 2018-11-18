@@ -28,7 +28,7 @@ npm install
 npm start
 ```
 
-The user-system requires a JWT_KEY for the token-generation to work, and therefore requires a random JWT_KEY in .env:
+The user-system requires a JWT_KEY for the token-generation to work, and therefore requires a random JWT_KEY in the __.env__ file:
 
 ```
 JWT_KEY= WRITE_A_RANDOM_LONG_STRING_HERE
