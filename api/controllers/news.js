@@ -8,6 +8,8 @@ const wss = require('../helpers/ws');
 
 const categories: Array<string> = require('../_data/data').categories;
 
+const PAGE_LIMIT = 20;
+
 // ----- NEWS -------
 
 // Fetch all news
@@ -40,8 +42,11 @@ exports.news_get_all = (req: $Request, res: $Response) => {
         query['importance'] = importance;
     }
 
+    // Pagination
+    const page: number =( req.query.page || 0)*PAGE_LIMIT;
+
     // Get all news, and unselect votes list
-    News.find(query).sort('-created_at').limit(20).exec()
+    News.find(query).sort('-created_at').skip(page).limit(PAGE_LIMIT).exec()
     .then((news: News) => {
         // Checks if user has voted for any of the news items
         const userId: string = (req.userData)? req.userData.userId : '';
