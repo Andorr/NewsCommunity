@@ -83,14 +83,7 @@ exports.user_login = (req: $Request, res: $Response) => {
 
 // Delete user with given id
 exports.user_delete = (req: $Request, res: $Response) => {
-    // Check if authorized user is the user to be deleted
-    if(req.params.userId !== req.userData.userId) {
-        return res.status(404).json({
-            message: 'Action is forbidden for this user'
-        });
-    }
-
-    User.deleteOne({_id: req.params.userId}).exec()
+    User.deleteOne({_id: req.userData.userId}).exec()
     .then((result: any) => {
         res.status(200).json({message: 'user deleted'});
     })

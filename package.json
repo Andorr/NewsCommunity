@@ -1,8 +1,9 @@
 {
-  "name": "oving03",
+  "name": "news-community",
   "version": "1.0.0",
   "description": "Assignment in TDAT2003",
   "main": "server.js",
+  "private": true,
   "engines": {
     "node": ">=8.0.0 <11.0.0"
   },
