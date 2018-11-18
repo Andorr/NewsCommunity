@@ -4,7 +4,7 @@ a basic implementation of the MVC concept with a MongoDB database.
 
 The API provides following functionality:
 * __News-Posts__: Endpoints for creating, deleting, and editing news-posts.
-* __User-system__: Endpoints for creating and deleting, with also an authentication-endpoint.
+* __User-system__: Endpoints for creating and deleting, in addition, an authentication-endpoint.
 * __WebSocket__: The possibility to connect to a websocket to get a live update on changes and creation of news-posts.
 
 
