@@ -71,29 +71,37 @@ Creates a new news-post. REQUIRES AUTH!
   * category: string. Is an enum of following values: 'sport', 'culture', 'entertainment', 'politics', 'IT', 'other'.
   * importance: number. The importance of a news-post
 
+
 * __/news/:id__ **GET**
 Returns the data of a given news-post
+
 
 * __/news/:id__ **DELETE** 
 Deletes a newspost. REQUIRES AUTH!
 
+
 * __/news/:id__ **PUT**
 Updates a given newspost. REQUIRES AUTH!
+
 
 * __/news/comment **POST**
 Creates a comment to a given post. REQUIRES AUTH!
 ###### Requires following parameters in body:
   * news: NEWS_ID
   * comment: string
-  
+
+
 * __/news/comment/:id **PUT**
 Edits a given comment. Must provide a __news__ attribute-id in body. REQURIES AUTH!
+
 
 * __/news/comment/:id **DELETE**
 Deletes a given comment. Must provide a __news__ attribute-id in body. REQURIES AUTH!
 
+
 * __/news/vote  **POST**
 Toggles the vote of the user on a given post. REQUIRES AUTH!
+
 
 * __/news/category **GET**
 Gets all the categories in form of an array
