@@ -60,7 +60,7 @@ Gets all latests news with a limit of 20.
   * importance: Gives news-posts with the given importance. It is a number [1-2].
   * user: Gives the news-posts posted by a given user. Needs to be authenticated to access this option.
 
-* __/news__ **POST**
+* __/news__ POST**
 Creates a new news-post. REQUIRES AUTH!
   ##### Requires following parameters in body:
   * title: string
@@ -84,51 +84,51 @@ Deletes a newspost. REQUIRES AUTH!
 Updates a given newspost. REQUIRES AUTH!
 
 
-* __/news/comment **POST**
+* __/news/comment__ **POST**
 Creates a comment to a given post. REQUIRES AUTH!
   ###### Requires following parameters in body:
   * news: NEWS_ID
   * comment: string
 
 
-* __/news/comment/:id **PUT**
+* __/news/comment/:id__ **PUT**
 Edits a given comment. Must provide a __news__ attribute-id in body. REQURIES AUTH!
 
 
-* __/news/comment/:id **DELETE**
+* __/news/comment/:id__ **DELETE**
 Deletes a given comment. Must provide a __news__ attribute-id in body. REQURIES AUTH!
 
 
-* __/news/vote  **POST**
+* __/news/vote__  **POST**
 Toggles the vote of the user on a given post. REQUIRES AUTH!
 
 
-* __/news/category **GET**
+* __/news/category__ **GET**
 Gets all the categories in form of an array
 
 
 #### Users
 
-* __/account/signup **POST**
+* __/account/signup__ **POST**
 Creates a new user.
   ###### Following parameters in body is required:
   * email: string
   * password: string
   * nickname: string
   
-* __/account/login **POST**
+* __/account/login__ **POST**
 Returns a token.
   ##### Following parameters in required in body
   * email: string
   * password: string
   
-* __/account **DELETE**
+* __/account__ **DELETE**
 Deletes an user. REQUIRES AUTH
 
-* __/account/avatar  **POST**
+* __/account/avatar__  **POST**
 Changes the user's profile image (avatar). REQURES AUTH!
   ##### Following parameters in required in body
   * image: FILE
 
-* __/account/ **GET**
+* __/account/__ **GET**
 Gets the user's user information, like email, nickname, and avatar. REQUIRES AUTH!
