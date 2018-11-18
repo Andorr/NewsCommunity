@@ -1,12 +1,21 @@
 # NewsCommunity - A Node Express REST API App
 This is a simple Node Express Rest API for a basic Newspage. It consists of 
-the basic implementation of the MVC concept with News-posts, comments, upvoting and users.
+a basic implementation of the MVC concept with a MongoDB database.
 
-It uses MongoDB as database and mongoose to communicate
+The API provides following functionality:
+* __News-Posts__: Endpoints for creating, deleting, and editing news-posts.
+* __User-system__: Endpoints for creating and deleting, with also an authentication-endpoint.
+* __WebSocket__: The possibility to connect to a websocket to get a live update on changes and creation of news-posts.
+
 
 ## Contents
+[Demo](#demo)  
 [Installation](#installation)  
 [Endpoints](#Endpoints)
+
+## Demo
+* Demostration of the API: [http://sys-ut-news-api.herokuapp.com/](http://sys-ut-news-api.herokuapp.com/)
+* Frontend using the API: [http://sys-ut-news-app.herokuapp.com/](http://sys-ut-news-app.herokuapp.com/)
 
 ## Installation
 
@@ -17,6 +26,12 @@ git clone git@github.com:Andorr/NewsCommunity.git
 cd NewsCommunity
 npm install
 npm start
+```
+
+The user-system requires a JWT_KEY for the token-generation to work, and therefore requires a random JWT_KEY in .env:
+
+```
+JWT_KEY= WRITE_A_RANDOM_LONG_STRING_HERE
 ```
 
 ### Custom configuration
@@ -31,7 +46,7 @@ MONGODB_TEST_DATABASE_URL=YOUR_TEST_DATABASE_URL_HERE
 
 #### Image upload
 The API has a solution for handling uploading of images to a server. By default this is a
-S3 hosted by [DigitalOcean](https://www.digitalocean.com/), and Digital Ocean required AWS keys.
+S3-server hosted by [DigitalOcean](https://www.digitalocean.com/), which requires AWS keys.
 To get this to work you have to define your own Digital Ocean S3 Space with AWS-keys.
 
 In the __.env__:
@@ -46,12 +61,12 @@ AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_ACCESS_KEY
 
 
 
-### Endpoints
+## Endpoints
 
 The API endpoints can be split into following sections: __News__ and __Users__:
 
 
-#### News
+### News
 * __/news__ **GET**
 Gets all latests news with a limit of 20.
   ##### Optional params
@@ -107,7 +122,7 @@ Toggles the vote of the user on a given post. REQUIRES AUTH!
 Gets all the categories in form of an array
 
 
-#### Users
+### Users
 
 * __/account/signup__ **POST**
 Creates a new user.
