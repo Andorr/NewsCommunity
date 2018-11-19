@@ -22,6 +22,7 @@ const db = mongoose.connect(
 // requests and reponses
 const buildResponse: Function = () => (http_mocks.createResponse({eventEmitter: EventEmitter}));
 const getAllNewsReq: Object = ({method: 'GET', url: 'news/'});
+const getAllNewsWithParams: Function = (params: Object) => ({method: 'GET', url: 'news/', query: params});
 const getNewsItemReq: Function = (id: string, userId: string) => ({method: 'GET', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
 const createNewsRequest: Function = (data: Object) => ({method: 'POST', url: 'news/', body: {...data}, file: {fileName: data.image}});
 const deleteNewsItemReq: Function = (id: string, userId: string) => ({method: 'DELETE', url: 'news/:id', params: {id: id}, userData: {userId: userId}});
@@ -58,6 +59,7 @@ describe('Testing user controller', () => {
                 resultUser = result;
             });
 
+            // Create news data for every item in testData
             testData.forEach(async (n: Object) => {
                 const news = new News({
                     id: new mongoose.Types.ObjectId(),
@@ -97,7 +99,8 @@ describe('Testing user controller', () => {
                 for (const con of connections) {
                     return con.close();
                 }
-                return mongoose.disconnect();
+                mongoose.disconnect();
+                done();
             });
         });
     });
