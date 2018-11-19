@@ -8,7 +8,7 @@ const wss = require('../helpers/ws');
 
 const categories: Array<string> = require('../_data/data').categories;
 
-const PAGE_LIMIT = 20;
+const PAGE_LIMIT = 1;
 
 // ----- NEWS -------
 
