@@ -10,7 +10,8 @@
   "scripts": {
     "test": "jest",
     "run": "nodemon --exec babel-node --presets env,babel-preset-flow server.js",
-    "start": "babel-node --presets env,babel-preset-flow server.js"
+    "start": "babel-node --presets env,babel-preset-flow server.js",
+    "flow": "flow"
   },
   "repository": {
     "type": "git",
