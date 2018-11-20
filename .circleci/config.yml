@@ -38,7 +38,7 @@ jobs:
       - run: npm test
 
       # run flow
-      - run: npm run flow check src
+      - run: npm run flow check api
 
 deployment:
   prod:
